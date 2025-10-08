@@ -1,6 +1,6 @@
-package fr.uphf.sae5A1api.data.sql.executor;
+package fr.uphf.sae5a1api.data.sql.executor;
 
-import fr.uphf.sae5A1api.data.HikariConnector;
+import fr.uphf.sae5a1api.data.HikariConnector;
 
 import java.sql.Connection;
 

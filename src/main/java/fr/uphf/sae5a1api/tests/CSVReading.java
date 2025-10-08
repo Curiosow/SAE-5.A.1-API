@@ -1,6 +1,6 @@
-package fr.uphf.sae5A1api.tests;
+package fr.uphf.sae5a1api.tests;
 
-import fr.uphf.sae5A1api.data.actions.ActionHandball;
+import fr.uphf.sae5a1api.data.actions.ActionHandball;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 

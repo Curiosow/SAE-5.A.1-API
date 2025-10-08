@@ -1,4 +1,4 @@
-package fr.uphf.sae5A1api.controllers;
+package fr.uphf.sae5a1api.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

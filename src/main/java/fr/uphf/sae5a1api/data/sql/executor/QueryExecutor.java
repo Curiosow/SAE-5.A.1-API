@@ -1,4 +1,4 @@
-package fr.uphf.sae5A1api.data.sql.executor;
+package fr.uphf.sae5a1api.data.sql.executor;
 
 import java.sql.Connection;
 

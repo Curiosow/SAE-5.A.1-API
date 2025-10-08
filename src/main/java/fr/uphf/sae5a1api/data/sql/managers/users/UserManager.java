@@ -1,10 +1,10 @@
-package fr.uphf.sae5A1api.data.sql.managers.users;
+package fr.uphf.sae5a1api.data.sql.managers.users;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
-import fr.uphf.sae5A1api.data.sql.executor.DatabaseExecutor;
-import fr.uphf.sae5A1api.data.users.Coach;
-import fr.uphf.sae5A1api.data.HikariConnector;
-import fr.uphf.sae5A1api.data.users.User;
+import fr.uphf.sae5a1api.data.sql.executor.DatabaseExecutor;
+import fr.uphf.sae5a1api.data.users.Coach;
+import fr.uphf.sae5a1api.data.HikariConnector;
+import fr.uphf.sae5a1api.data.users.User;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

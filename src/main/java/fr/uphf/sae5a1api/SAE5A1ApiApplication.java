@@ -1,6 +1,6 @@
-package fr.uphf.sae5A1api;
+package fr.uphf.sae5a1api;
 
-import fr.uphf.sae5A1api.data.HikariConnector;
+import fr.uphf.sae5a1api.data.HikariConnector;
 import lombok.Getter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

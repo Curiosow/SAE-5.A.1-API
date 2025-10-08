@@ -1,4 +1,4 @@
-package fr.uphf.sae5A1api;
+package fr.uphf.sae5a1api;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

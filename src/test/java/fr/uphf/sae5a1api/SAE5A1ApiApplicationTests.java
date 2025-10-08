@@ -1,4 +1,4 @@
-package fr.uphf.sae5A1api;
+package fr.uphf.sae5a1api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

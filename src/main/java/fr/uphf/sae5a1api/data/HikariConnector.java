@@ -1,4 +1,4 @@
-package fr.uphf.sae5A1api.data;
+package fr.uphf.sae5a1api.data;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

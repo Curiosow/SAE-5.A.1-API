@@ -1,4 +1,4 @@
-package fr.uphf.sae5A1api.data.users;
+package fr.uphf.sae5a1api.data.users;
 
 import java.util.Date;
 import java.util.UUID;
