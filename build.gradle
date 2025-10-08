@@ -41,6 +41,9 @@ dependencies {
     // HikariCP
     implementation group: 'com.zaxxer', name: 'HikariCP', version: '4.0.3'
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0'
+
+    // PASSWORD ENCODER
+    implementation("at.favre.lib:bcrypt:0.10.2")
 }
 
 tasks.named('test') {

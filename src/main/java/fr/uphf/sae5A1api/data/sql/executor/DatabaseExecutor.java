@@ -1,4 +1,4 @@
-package fr.uphf.sae5A1api.data.executor;
+package fr.uphf.sae5A1api.data.sql.executor;
 
 import fr.uphf.sae5A1api.data.HikariConnector;
 

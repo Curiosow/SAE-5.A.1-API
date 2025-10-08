@@ -1,24 +1,12 @@
 package fr.uphf.sae5A1api.data.users;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.Date;
 import java.util.UUID;
 
-@Getter
-@Setter
-@AllArgsConstructor
-public class Coach {
 
-    private UUID uuid;
-    private String email;
-    private String password;
-    private String first_name;
-    private String last_name;
-    private boolean active;
-    private Date created_at;
-    private Date updated_at;
+public class Coach extends User {
 
+    public Coach(UUID uuid, String email, String password, String first_name, String last_name, boolean active, Date created_at, Date updated_at) {
+        super(uuid, email, password, first_name, last_name, active, created_at, updated_at);
+    }
 }
