@@ -28,14 +28,14 @@ public class AuthController {
         );
 
         UserManager.createUser(user);
-        return ResponseEntity.ok("User creation success!");
+        return ResponseEntity.ok("Création de l'utilisateur réussie !");
     }
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestParam String email, @RequestParam String password) {
         User user = UserManager.login(email, password);
         if(user == null)
-            return ResponseEntity.status(401).body("The email or the password isn't correct!");
-        return ResponseEntity.ok("Success login for " + user.getFirst_name() + " " + user.getLast_name());
+            return ResponseEntity.status(401).body("L'adresse e-mail ou le mot de passe est incorrect !");
+        return ResponseEntity.ok("Connexion réussie pour " + user.getFirst_name() + " " + user.getLast_name());
     }
 }
