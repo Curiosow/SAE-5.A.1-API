@@ -4,6 +4,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import fr.uphf.sae5a1api.data.sql.executor.DatabaseExecutor;
 import fr.uphf.sae5a1api.data.users.Coach;
 import fr.uphf.sae5a1api.data.HikariConnector;
+import fr.uphf.sae5a1api.data.users.Player;
 import fr.uphf.sae5a1api.data.users.User;
 
 import java.sql.PreparedStatement;
@@ -24,7 +25,8 @@ public class UserManager {
     // Ca c'est mes requêtess, c'est un peu comme des templates, en gros c'est les requêtes de bases et les "?" sont remplacés par des valeurs
     public static final String GET_COACH_BY_MAIL  = "SELECT * FROM " + COACH_TABLE + " where email = ?";
     public static final String SAVE_COACH         = "INSERT INTO " + COACH_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    public static final String SAVE_PLAYER        = "INSERT INTO " + PLAYER_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    public static final String SAVE_PLAYER        = "INSERT INTO " + PLAYER_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?)";
+    public static final String GET_MEMBER = "SELECT first_name, last_name, email, 'player' AS account_type FROM " + PLAYER_TABLE + " UNION ALL SELECT first_name, last_name, email, 'coach' AS account_type FROM " + COACH_TABLE;
 
     // ça c'est pour créer un user, donc c'est une fonction qui est void, elle ne retourne rien, elle fait juste des actions
     public static void createUser(User user) {
@@ -44,6 +46,39 @@ public class UserManager {
            statement.setTimestamp(8, new Timestamp(user.getUpdated_at().getTime()));
             // Et donc executeUpdate() c'est pour faire une update, c'est pas pour récupérer une valeur
            statement.executeUpdate();
+        });
+    }
+
+    public static void createPlayer(Player player) {
+        DatabaseExecutor.executeVoidQuery(HikariConnector.get(), connection -> {
+            PreparedStatement statement = connection.prepareStatement(SAVE_PLAYER);
+
+            statement.setObject(1, player.getUuid());
+            statement.setObject(2, player.getTeam_id());
+            statement.setString(3, player.getEmail());
+            statement.setString(4, player.getPassword());
+            statement.setString(5, player.getFirst_name());
+            statement.setString(6, player.getLast_name());
+            statement.setInt(7, player.getJersey_number());
+            statement.setDate(8, new java.sql.Date(player.getBirth_date().getTime()));            statement.setInt(9, player.getHeight_cm());
+            statement.setInt(10, player.getWeight_kg());
+            statement.setBoolean(11, player.isActive());
+            statement.setTimestamp(12, new Timestamp(player.getCreated_at().getTime()));
+            statement.setTimestamp(13, new Timestamp(player.getUpdated_at().getTime()));
+
+            statement.executeUpdate();
+        });
+    }
+/*    public static final String GET_MEMBER        = "SELECT first_name, last_name, email, 'player' AS account_type FROM " + PLAYER_TABLE +"UNION ALL SELECT first_name, last_name, email, 'coach' AS account_type FROM "+ COACH_TABLE;
+*/
+    // Récupère tous les membres (players et coaches) avec leur type de compte
+    public static void getMembers(java.util.function.Consumer<ResultSet> consumer) {
+        DatabaseExecutor.executeVoidQuery(HikariConnector.get(), connection -> {
+            PreparedStatement statement = connection.prepareStatement(GET_MEMBER);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                consumer.accept(resultSet);
+            }
         });
     }
 
@@ -71,6 +106,8 @@ public class UserManager {
 
         });
     }
+
+
 
     // Le buildCoach() il me permet de build un objet Java juste en récupérant le ResultSet, c'est bcp plus simple, je récupère chaque data et ça me permet de créer mon objet
     private static Coach buildCoach(ResultSet rs) throws SQLException {
