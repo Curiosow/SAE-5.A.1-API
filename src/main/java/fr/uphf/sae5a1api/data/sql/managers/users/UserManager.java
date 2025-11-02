@@ -25,7 +25,7 @@ public class UserManager {
     // Ca c'est mes requêtess, c'est un peu comme des templates, en gros c'est les requêtes de bases et les "?" sont remplacés par des valeurs
     public static final String GET_COACH_BY_MAIL = "SELECT * FROM " + COACH_TABLE + " where email = ?";
     public static final String SAVE_COACH = "INSERT INTO " + COACH_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    public static final String SAVE_PLAYER = "INSERT INTO " + PLAYER_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?)";
+    public static final String SAVE_PLAYER = "INSERT INTO " + PLAYER_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?,?,?)";
     public static final String GET_MEMBER = "SELECT first_name, last_name, email, 'player' AS account_type FROM " + PLAYER_TABLE + " UNION ALL SELECT first_name, last_name, email, 'coach' AS account_type FROM " + COACH_TABLE;
     public static final String GET_PLAYER = "SELECT p.*, t.name AS team_name FROM " + PLAYER_TABLE + " p JOIN teams t ON p.team_id = t.id ";
     public static final String GET_COACH = "SELECT * FROM " + COACH_TABLE;
@@ -80,13 +80,15 @@ public class UserManager {
             statement.setBoolean(11, player.isActive());
             statement.setTimestamp(12, new Timestamp(player.getCreated_at().getTime()));
             statement.setTimestamp(13, new Timestamp(player.getUpdated_at().getTime()));
+            statement.setString(14, player.getPicture_url());
+            statement.setString(15, player.getNom_csv());
+
 
             statement.executeUpdate();
         });
     }
 
-    /*    public static final String GET_MEMBER        = "SELECT first_name, last_name, email, 'player' AS account_type FROM " + PLAYER_TABLE +"UNION ALL SELECT first_name, last_name, email, 'coach' AS account_type FROM "+ COACH_TABLE;
-     */
+
     // Récupère tous les membres (players et coaches) avec leur type de compte
     public static void getMembers(java.util.function.Consumer<ResultSet> consumer) {
         DatabaseExecutor.executeVoidQuery(HikariConnector.get(), connection -> {

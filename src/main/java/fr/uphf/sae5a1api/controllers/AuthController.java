@@ -52,6 +52,14 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Format de date invalide (attendu : yyyy-MM-dd)");
         }
 
+        String nom_csv = java.text.Normalizer.normalize(firstName, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "") // "Léa" -> "Lea"
+                .trim()                                            // " Lea " -> "Lea"
+                .toUpperCase();
+
+
+
+
         Player player = new Player(
                 UUID.randomUUID(),
                 UUID.fromString("e2a4c7b1-9f3d-4e6a-8b2c-7d1e5f4c3a2b"),
@@ -65,7 +73,9 @@ public class AuthController {
                 70,
                 true,
                 new Date(System.currentTimeMillis()),
-                new Date(System.currentTimeMillis())
+                new Date(System.currentTimeMillis()),
+                null,
+                nom_csv
         );
 
         UserManager.createPlayer(player);
@@ -130,6 +140,7 @@ public class AuthController {
         UserManager.getPlayer(rs -> {
             try {
                 Map<String, Object> player = new HashMap<>();
+                player.put("id", rs.getString("id"));
                 player.put("first_name", rs.getString("first_name"));
                 player.put("last_name", rs.getString("last_name"));
                 player.put("team_name", rs.getString("team_name"));
