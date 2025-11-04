@@ -1,6 +1,7 @@
 package fr.uphf.sae5a1api.controllers; // (Votre package)
 
 // Imports pour le parsing CSV
+import fr.uphf.sae5a1api.SAE5A1ApiApplication;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 /**
  * Controller pour gérer l'import de CSV et l'affichage des stats.
@@ -111,7 +113,7 @@ public class HandballController {
                         // --- FIN ADAPTATION ---
 
                         if (nomCsv == null || nomCsv.isEmpty()) {
-                            System.err.println("Ligne joueur ignorée (nom vide): " + record.getRecordNumber());
+                            SAE5A1ApiApplication.getLogger().log(Level.SEVERE, "Ligne joueur ignorée (nom vide): " + record.getRecordNumber());
                             stats[2]++;
                             continue;
                         }
@@ -128,16 +130,16 @@ public class HandballController {
                             else stats[1]++;
 
                         } catch (SQLException e) {
-                            System.err.println("Erreur BDD pour joueur '" + nomCsv + "': " + e.getMessage());
+                            SAE5A1ApiApplication.getLogger().log(Level.SEVERE, "Erreur BDD pour joueur '" + nomCsv + "': " + e.getMessage());
                             stats[2]++;
                         }
                     } // Fin de la boucle CSV
 
                     if (stats[2] > 0) {
-                        System.err.println(stats[2] + " erreurs rencontrées, annulation de la transaction.");
+                        SAE5A1ApiApplication.getLogger().log(Level.SEVERE, stats[2] + " erreurs rencontrées, annulation de la transaction.");
                         connection.rollback();
                     } else {
-                        System.out.println("Importation joueurs réussie, commit de la transaction.");
+                        SAE5A1ApiApplication.getLogger().log(Level.FINE, "Importation joueurs réussie, commit de la transaction.");
                         connection.commit();
                     }
 
@@ -213,7 +215,7 @@ public class HandballController {
                 {
                     for (CSVRecord record : csvParser) {
                         if (!record.isConsistent()) {
-                            System.err.println("Attention: Ligne CSV inconsistante ignorée: " + record.getRecordNumber());
+                            SAE5A1ApiApplication.getLogger().log(Level.SEVERE, "Attention: Ligne CSV inconsistante ignorée: " + record.getRecordNumber());
                             continue;
                         }
 
@@ -328,7 +330,7 @@ public class HandballController {
             return Long.parseLong(value.trim());
         }
         catch (NumberFormatException e) {
-            System.err.println("Erreur de parsing Long: '" + value + "'");
+            SAE5A1ApiApplication.getLogger().log(Level.SEVERE, "Erreur de parsing Long: '" + value + "'");
             return null;
         }
     }
@@ -339,7 +341,7 @@ public class HandballController {
             return Integer.parseInt(value.trim());
         }
         catch (NumberFormatException e) {
-            System.err.println("Erreur de parsing Integer: '" + value + "'");
+            SAE5A1ApiApplication.getLogger().log(Level.SEVERE, "Erreur de parsing Integer: '" + value + "'");
             return null;
         }
     }

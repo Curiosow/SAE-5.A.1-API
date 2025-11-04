@@ -1,5 +1,6 @@
 package fr.uphf.sae5a1api.tests;
 
+import fr.uphf.sae5a1api.SAE5A1ApiApplication;
 import fr.uphf.sae5a1api.data.actions.ActionHandball;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 
 public class CSVReading {
 
@@ -24,7 +26,7 @@ public class CSVReading {
                     workbook.getSheetAt(0) : workbook.getSheet(sheetName);
 
             if (sheet == null) {
-                System.out.println("La feuille '" + sheetName + "' n'existe pas.");
+                SAE5A1ApiApplication.getLogger().log(Level.INFO, "La feuille '" + sheetName + "' n'existe pas.");
                 return actions;
             }
 

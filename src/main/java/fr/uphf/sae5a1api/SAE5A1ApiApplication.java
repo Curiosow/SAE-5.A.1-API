@@ -6,6 +6,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SpringBootApplication
 public class SAE5A1ApiApplication {
@@ -13,10 +15,13 @@ public class SAE5A1ApiApplication {
     @Getter
     private static HikariConnector hikariConnector;
 
-    public static void main(String[] args) {
-        System.out.println("Starting WEB-API...");
+    @Getter
+    private static final Logger logger = Logger.getLogger(SAE5A1ApiApplication.class.getName());
 
-        System.out.println("Connecting to database...");
+    public static void main(String[] args) {
+        logger.log(Level.INFO, "Starting WEB-API...");
+
+        logger.log(Level.INFO, "Connecting to database...");
         try {
             hikariConnector = HikariConnector.create("87.106.121.50", "leswinners", "kelawin", "postgres", 5432);
         } catch (Exception e) {
@@ -25,15 +30,15 @@ public class SAE5A1ApiApplication {
 
         try {
             if(hikariConnector.getConnection() != null && !hikariConnector.getConnection().isClosed())
-                System.out.println("Connected to database.");
+                logger.log(Level.FINE, "Connected to database.");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        System.out.println("Starting Spring App...");
+        logger.log(Level.INFO, "Starting Spring App...");
         SpringApplication.run(SAE5A1ApiApplication.class, args);
-        System.out.println("Started Spring App.");
-        System.out.println("Started WEB-API. Welcome on board!");
+        logger.log(Level.FINE, "Started Spring App.");
+        logger.log(Level.FINE, "Started WEB-API. Welcome on board!");
     }
 
 }

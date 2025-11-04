@@ -1,6 +1,7 @@
 package fr.uphf.sae5a1api.controllers;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import fr.uphf.sae5a1api.SAE5A1ApiApplication;
 import fr.uphf.sae5a1api.data.HikariConnector;
 import fr.uphf.sae5a1api.data.sql.executor.DatabaseExecutor;
 import fr.uphf.sae5a1api.data.sql.managers.users.UserManager;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.*;
+import java.util.logging.Level;
 
 @RestController
 @RequestMapping("/auth")
@@ -126,7 +128,7 @@ public class AuthController {
                 member.put("email", rs.getString("email"));
                 member.put("account_type", rs.getString("account_type"));
                 members.add(member);
-                System.out.println("Membre trouvé : " + rs.getString("email"));
+                SAE5A1ApiApplication.getLogger().log(Level.INFO, "Membre trouvé : " + rs.getString("email"));
             } catch (Exception e) {
                 e.printStackTrace();
             }

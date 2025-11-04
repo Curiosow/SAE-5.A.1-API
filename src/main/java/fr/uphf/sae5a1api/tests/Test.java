@@ -1,9 +1,11 @@
 package fr.uphf.sae5a1api.tests;
 
+import fr.uphf.sae5a1api.SAE5A1ApiApplication;
 import fr.uphf.sae5a1api.data.actions.ActionHandball;
 
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class Test {
@@ -21,21 +23,23 @@ public class Test {
                             return tirs > 0 ? (buts * 100.0 / tirs) : 0.0;
                         })
                 ));
-        System.out.println(tauxReussiteParJoueuse);
 
-        System.out.println(" -- ");
+        SAE5A1ApiApplication.getLogger().log(Level.INFO, tauxReussiteParJoueuse + "");*/
+
+        SAE5A1ApiApplication.getLogger().log(Level.INFO, " -- ");
         Map<String, Long> repartitionResultats = data.stream()
                 .collect(Collectors.groupingBy(ActionHandball::getResultat, Collectors.counting()));
-        System.out.println(repartitionResultats);
-        System.out.println(" -- ");
+        SAE5A1ApiApplication.getLogger().log(Level.INFO, repartitionResultats + "");
+        SAE5A1ApiApplication.getLogger().log(Level.INFO, " -- ");
 
-        Map<String, Double> tempsMoyenParJoueuse = data.stream()
+        /*Map<String, Double> tempsMoyenParJoueuse = data.stream()
                 .collect(Collectors.groupingBy(
                         ActionHandball::getJoueuse,
                         Collectors.averagingDouble(ActionHandball::getDuree)
                 ));
-        System.out.println(tempsMoyenParJoueuse);
-        System.out.println(" -- ");*/
+        SAE5A1ApiApplication.getLogger().log(Level.INFO, tempsMoyenParJoueuse + "");
+        */
+        SAE5A1ApiApplication.getLogger().log(Level.INFO, " -- ");
 
 
     }
