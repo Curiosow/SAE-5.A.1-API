@@ -45,10 +45,10 @@ public class CSVReading {
                 String defense     = getStringCell(row, 7);
                 String commentaire = getStringCell(row, 14);
 
-                ActionHandball action = new ActionHandball(position, temps, duree,
+                /*ActionHandball action = new ActionHandball(position, temps, duree,
                         joueuse, resultat, secteur,
                         defense, commentaire);
-                actions.add(action);
+                actions.add(action);*/
             }
 
         } catch (IOException e) {

@@ -44,6 +44,9 @@ dependencies {
 
     // PASSWORD ENCODER
     implementation("at.favre.lib:bcrypt:0.10.2")
+
+    // Apache Commons CSV
+    implementation 'org.apache.commons:commons-csv:1.11.0'
 }
 
 tasks.named('test') {

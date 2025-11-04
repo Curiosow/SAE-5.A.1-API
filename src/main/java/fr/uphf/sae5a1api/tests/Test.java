@@ -12,7 +12,7 @@ public class Test {
         CSVReading csvReading = new CSVReading();
         List<ActionHandball> data = csvReading.readActions("/Users/oscarbouttier/Documents/Cours/BUT3/SAE 5.A.1/R5A12-API/src/main/java/fr/uphf/sae5A1api/tests/stats.xlsx", "Données brutes");
 
-        Map<String, Double> tauxReussiteParJoueuse = data.stream()
+        /*Map<String, Double> tauxReussiteParJoueuse = data.stream()
                 .collect(Collectors.groupingBy(
                         ActionHandball::getJoueuse,
                         Collectors.collectingAndThen(Collectors.toList(), list -> {
@@ -35,7 +35,7 @@ public class Test {
                         Collectors.averagingDouble(ActionHandball::getDuree)
                 ));
         System.out.println(tempsMoyenParJoueuse);
-        System.out.println(" -- ");
+        System.out.println(" -- ");*/
 
 
     }
