@@ -1,11 +1,15 @@
 package fr.uphf.sae5a1api;
 
 import fr.uphf.sae5a1api.data.HikariConnector;
+import fr.uphf.sae5a1api.runnable.GetRankingTask;
 import lombok.Getter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.sql.SQLException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +21,9 @@ public class SAE5A1ApiApplication {
 
     @Getter
     private static final Logger logger = Logger.getLogger(SAE5A1ApiApplication.class.getName());
+
+    @Getter
+    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public static void main(String[] args) {
         logger.log(Level.INFO, "Starting WEB-API...");
@@ -34,6 +41,11 @@ public class SAE5A1ApiApplication {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
+        logger.log(Level.INFO, "Starting runnables");
+        GetRankingTask rankingTask = new GetRankingTask();
+        scheduler.scheduleAtFixedRate(rankingTask, 1, 60 * 12, TimeUnit.MINUTES);
+        logger.log(Level.FINE, "Started runnables.");
 
         logger.log(Level.INFO, "Starting Spring App...");
         SpringApplication.run(SAE5A1ApiApplication.class, args);
