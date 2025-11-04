@@ -21,6 +21,12 @@ import java.util.logging.Level;
 @RequestMapping("/auth")
 public class AuthController {
 
+    public final String FIRST_NAME = "first_name";
+    public final String LAST_NAME = "last_name";
+    public final String EMAIL = "email";
+    public final String IS_ACTIVE = "is_active";
+    public final String UPDATED_AT = "updated_at";
+
     @PostMapping("/register_coach")
     public ResponseEntity<String> registerCoach(@RequestParam String email, @RequestParam String password, @RequestParam String firstName, @RequestParam String lastName) {
         User user = new Coach(
@@ -123,9 +129,9 @@ public class AuthController {
         UserManager.getMembers(rs -> {
             try {
                 Map<String, Object> member = new HashMap<>();
-                member.put("first_name", rs.getString("first_name"));
-                member.put("last_name", rs.getString("last_name"));
-                member.put("email", rs.getString("email"));
+                member.put(FIRST_NAME, rs.getString(FIRST_NAME));
+                member.put(LAST_NAME, rs.getString(LAST_NAME));
+                member.put(EMAIL, rs.getString(EMAIL));
                 member.put("account_type", rs.getString("account_type"));
                 members.add(member);
                 SAE5A1ApiApplication.getLogger().log(Level.INFO, "Membre trouvé : " + rs.getString("email"));
@@ -143,15 +149,15 @@ public class AuthController {
             try {
                 Map<String, Object> player = new HashMap<>();
                 player.put("id", rs.getString("id"));
-                player.put("first_name", rs.getString("first_name"));
-                player.put("last_name", rs.getString("last_name"));
+                player.put(FIRST_NAME, rs.getString(FIRST_NAME));
+                player.put(LAST_NAME, rs.getString(LAST_NAME));
                 player.put("team_name", rs.getString("team_name"));
-                player.put("email", rs.getString("email"));
+                player.put(EMAIL, rs.getString(EMAIL));
                 player.put("jersey_number", rs.getInt("jersey_number"));
                 player.put("birth_date", rs.getDate("birth_date"));
                 player.put("height_cm", rs.getInt("height_cm"));
-                player.put("is_active", rs.getBoolean("is_active"));
-                player.put("updated_at", rs.getTimestamp("updated_at"));
+                player.put(IS_ACTIVE, rs.getBoolean(IS_ACTIVE));
+                player.put(UPDATED_AT, rs.getTimestamp(UPDATED_AT));
                 player.put("picture", rs.getString("picture"));
                 players.add(player);
             } catch (Exception e) {
@@ -167,11 +173,11 @@ public class AuthController {
         UserManager.getCoach(rs -> {
             try {
                 Map<String, Object> coach = new HashMap<>();
-                coach.put("email", rs.getString("email"));
-                coach.put("first_name", rs.getString("first_name"));
-                coach.put("last_name", rs.getString("last_name"));
-                coach.put("is_active", rs.getBoolean("is_active"));
-                coach.put("updated_at", rs.getTimestamp("updated_at"));
+                coach.put(EMAIL, rs.getString(EMAIL));
+                coach.put(FIRST_NAME, rs.getString(FIRST_NAME));
+                coach.put(LAST_NAME, rs.getString(LAST_NAME));
+                coach.put(IS_ACTIVE, rs.getBoolean(IS_ACTIVE));
+                coach.put(UPDATED_AT, rs.getTimestamp(UPDATED_AT));
                 coaches.add(coach);
             } catch (Exception e) {
                 throw new RuntimeException(e);
