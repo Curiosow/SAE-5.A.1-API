@@ -54,7 +54,7 @@ public class CSVReading {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         return actions;

@@ -130,7 +130,7 @@ public class AuthController {
                 members.add(member);
                 SAE5A1ApiApplication.getLogger().log(Level.INFO, "Membre trouvé : " + rs.getString("email"));
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         });
         return ResponseEntity.ok(members);
@@ -155,7 +155,7 @@ public class AuthController {
                 player.put("picture", rs.getString("picture"));
                 players.add(player);
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         });
         return ResponseEntity.ok(players);
@@ -174,7 +174,7 @@ public class AuthController {
                 coach.put("updated_at", rs.getTimestamp("updated_at"));
                 coaches.add(coach);
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         });
         return ResponseEntity.ok(coaches);

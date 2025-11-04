@@ -65,7 +65,6 @@ public class HandballController {
         } catch (IllegalArgumentException | DateTimeParseException e) {
             return new ResponseEntity<>("Données invalides (UUID ou date mal formatée): " + e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>("Erreur serveur lors de la création du match: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -160,7 +159,6 @@ public class HandballController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>("Erreur critique lors de l'import des joueurs: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -191,7 +189,6 @@ public class HandballController {
                 return new ResponseEntity<>("Le match " + matchId + " n'a pas de teamId associé.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>("Erreur lors de la vérification du match: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -265,7 +262,6 @@ public class HandballController {
             });
 
         } catch (Exception e) {
-            e.printStackTrace();
             if (e instanceof IllegalArgumentException && e.getMessage().contains("Mapping not found")) {
                 return new ResponseEntity<>("Erreur de Parsing CSV: Colonne attendue non trouvée. Vérifiez les en-têtes du fichier. Détail: " + e.getMessage(), HttpStatus.BAD_REQUEST);
             }
@@ -281,7 +277,6 @@ public class HandballController {
             HandballDataManager.importActionsEnBatch(actionsToSave);
             return new ResponseEntity<>("Importation réussie: " + actionsToSave.size() + " actions ajoutées.", HttpStatus.CREATED);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>("Erreur lors de l'écriture en BDD: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -295,7 +290,6 @@ public class HandballController {
             Map<String, Object> stats = HandballDataManager.getSummaryStats(matchId, joueurId);
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -308,7 +302,6 @@ public class HandballController {
             List<Map<String, Object>> heatmapData = HandballDataManager.getHeatmap(matchId, joueurId);
             return ResponseEntity.ok(heatmapData);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -361,7 +354,6 @@ public class HandballController {
             return ResponseEntity.ok(stats);
 
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

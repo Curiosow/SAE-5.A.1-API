@@ -21,7 +21,7 @@ public class DatabaseExecutor {
         try (Connection connection = connector.getConnection()) {
             value = executor.perform(connection);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         return value;
     }
@@ -30,7 +30,7 @@ public class DatabaseExecutor {
         try (Connection connection = connector.getConnection()) {
             executor.perform(connection);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
