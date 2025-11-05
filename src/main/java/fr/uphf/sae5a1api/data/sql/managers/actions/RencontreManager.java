@@ -1,7 +1,7 @@
-package fr.uphf.sae5a1api.data.sql.managers.data;
+package fr.uphf.sae5a1api.data.sql.managers.actions;
 
 import fr.uphf.sae5a1api.data.HikariConnector;
-import fr.uphf.sae5a1api.data.actions.Rencontre;
+import fr.uphf.sae5a1api.data.impl.actions.Rencontre;
 import fr.uphf.sae5a1api.data.sql.executor.DatabaseExecutor;
 
 import java.sql.PreparedStatement;

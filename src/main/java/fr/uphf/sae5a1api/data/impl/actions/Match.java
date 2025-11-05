@@ -1,4 +1,4 @@
-package fr.uphf.sae5a1api.data.actions;
+package fr.uphf.sae5a1api.data.impl.actions;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

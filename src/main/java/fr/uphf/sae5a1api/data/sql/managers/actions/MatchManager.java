@@ -1,13 +1,12 @@
-package fr.uphf.sae5a1api.data.sql.managers.data; // (Adaptez le package)
+package fr.uphf.sae5a1api.data.sql.managers.actions; // (Adaptez le package)
 
 import fr.uphf.sae5a1api.data.HikariConnector;
 import fr.uphf.sae5a1api.data.sql.executor.DatabaseExecutor;
-import fr.uphf.sae5a1api.data.actions.Match; // (Importez le POJO Match)
+import fr.uphf.sae5a1api.data.impl.actions.Match; // (Importez le POJO Match)
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.time.LocalDate; // AJOUT: Pour la conversion retour
 import java.util.UUID;
 
 /**

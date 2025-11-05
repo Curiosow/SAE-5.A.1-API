@@ -2,18 +2,13 @@ package fr.uphf.sae5a1api.controllers;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import fr.uphf.sae5a1api.SAE5A1ApiApplication;
-import fr.uphf.sae5a1api.data.HikariConnector;
-import fr.uphf.sae5a1api.data.sql.executor.DatabaseExecutor;
 import fr.uphf.sae5a1api.data.sql.managers.users.UserManager;
-import fr.uphf.sae5a1api.data.users.Coach;
-import fr.uphf.sae5a1api.data.users.Player;
-import fr.uphf.sae5a1api.data.users.Team;
-import fr.uphf.sae5a1api.data.users.User;
+import fr.uphf.sae5a1api.data.impl.users.Coach;
+import fr.uphf.sae5a1api.data.impl.users.Player;
+import fr.uphf.sae5a1api.data.impl.users.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.*;
 import java.util.logging.Level;
 

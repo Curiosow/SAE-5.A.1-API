@@ -1,9 +1,8 @@
-package fr.uphf.sae5a1api.data.users;
+package fr.uphf.sae5a1api.data.impl.users;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import java.text.Normalizer;
 import java.util.Date;
 import java.util.UUID;
 

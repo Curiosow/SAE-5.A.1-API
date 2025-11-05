@@ -1,7 +1,7 @@
-package fr.uphf.sae5a1api.data.sql.managers.data;
+package fr.uphf.sae5a1api.data.sql.managers.teams;
 
 import fr.uphf.sae5a1api.data.HikariConnector;
-import fr.uphf.sae5a1api.data.actions.RankedTeam;
+import fr.uphf.sae5a1api.data.impl.teams.RankedTeam;
 import fr.uphf.sae5a1api.data.sql.executor.DatabaseExecutor;
 
 import java.sql.PreparedStatement;
@@ -24,6 +24,7 @@ public class RankingManager {
             "classement_nbr_match_nul = EXCLUDED.classement_nbr_match_nul, classement_nbr_match_perdu = EXCLUDED.classement_nbr_match_perdu, " +
             "classement_but_plus = EXCLUDED.classement_but_plus, classement_but_moins = EXCLUDED.classement_but_moins, classement_difference = EXCLUDED.classement_difference";
     public static final String GET_ALL_TEAMS = "SELECT * FROM " + CLASSEMENTS_TABLE;
+    public static final String GET_TEAM_AVESNOIS = "SELECT * FROM " + CLASSEMENTS_TABLE + " WHERE id = ?";
 
     public static void save(RankedTeam rankedTeam) {
         DatabaseExecutor.executeVoidQuery(HikariConnector.get(), data -> {
@@ -60,6 +61,19 @@ public class RankingManager {
                 rankedTeams.add(buildRankedTeam(resultSet));
 
             return rankedTeams;
+        });
+    }
+
+    public static RankedTeam getTeamAvesnois() {
+        return DatabaseExecutor.executeQuery(HikariConnector.get(), data -> {
+            PreparedStatement statement = data.prepareStatement(RankingManager.GET_TEAM_AVESNOIS);
+            statement.setInt(1, 125);
+            ResultSet resultSet = statement.executeQuery();
+
+            if(resultSet.next())
+                return buildRankedTeam(resultSet);
+            else
+                return null;
         });
     }
 

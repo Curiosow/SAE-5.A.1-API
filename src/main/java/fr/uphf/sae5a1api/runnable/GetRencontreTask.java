@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.uphf.sae5a1api.SAE5A1ApiApplication;
 import fr.uphf.sae5a1api.data.actions.RankedTeam;
-import fr.uphf.sae5a1api.data.actions.Rencontre;
+import fr.uphf.sae5a1api.data.impl.actions.Rencontre;
 import fr.uphf.sae5a1api.data.sql.managers.data.RankingManager;
-import fr.uphf.sae5a1api.data.sql.managers.data.RencontreManager;
+import fr.uphf.sae5a1api.data.sql.managers.actions.RencontreManager;
 
 import java.io.IOException;
 import java.net.URI;

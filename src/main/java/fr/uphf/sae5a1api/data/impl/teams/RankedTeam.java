@@ -1,4 +1,4 @@
-package fr.uphf.sae5a1api.data.actions;
+package fr.uphf.sae5a1api.data.impl.teams;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
