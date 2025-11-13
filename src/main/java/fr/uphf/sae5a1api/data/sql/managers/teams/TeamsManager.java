@@ -38,8 +38,8 @@ public class TeamsManager {
         String description = rs.getString("description");
         String season = rs.getString("season");
         boolean is_active = rs.getBoolean("is_active");
-        Date created_ad = rs.getTimestamp("created_ad");
-        Date updated_ad = rs.getTimestamp("updated_ad");
+        Date created_ad = rs.getTimestamp("created_at");
+        Date updated_ad = rs.getTimestamp("updated_at");
         String logo = rs.getString("logo");
 
         return new Team(id, coach_id, name, description, season, is_active, created_ad, updated_ad, logo);
