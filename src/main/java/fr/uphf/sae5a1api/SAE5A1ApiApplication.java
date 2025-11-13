@@ -3,6 +3,7 @@ package fr.uphf.sae5a1api;
 import fr.uphf.sae5a1api.data.HikariConnector;
 import fr.uphf.sae5a1api.runnable.GetRankingTask;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -17,6 +18,7 @@ import java.util.logging.Logger;
 public class SAE5A1ApiApplication {
 
     @Getter
+    @Setter
     private static HikariConnector hikariConnector;
 
     @Getter

@@ -1,4 +1,4 @@
-package fr.uphf.sae5a1api.data.impl.users;
+package fr.uphf.sae5a1api.data.impl.teams;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,15 +12,14 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Team {
 
-    private UUID uuid;
-    private UUID coach_uuid;
-    private String name;
+    private final UUID uuid;
+    private UUID coach_id;
+    private final String name;
     private String description;
     private String season;
-    private boolean active;
-    private boolean is_active;
-    private Date created_at;
+    private final boolean is_active;
+    private final Date create_at;
     private Date updated_at;
-
+    private String logo;
 
 }

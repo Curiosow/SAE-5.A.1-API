@@ -46,7 +46,7 @@ public class CSVReading {
                 Iterator<Row> rowIterator = sheet.iterator();
                 if (rowIterator.hasNext()) rowIterator.next();
 
-                UUID uuid = UUID.randomUUID();
+                UUID uuid = UUID.fromString("8499c39c-0e30-4f9c-af41-8d5160169185");
                 while (rowIterator.hasNext()) {
                     Row row = rowIterator.next();
                     if (getStringCell(row, 0).isEmpty()) continue;
