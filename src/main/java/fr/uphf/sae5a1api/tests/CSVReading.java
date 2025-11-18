@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.logging.Level;
 
 public class CSVReading {
@@ -46,12 +45,12 @@ public class CSVReading {
                 Iterator<Row> rowIterator = sheet.iterator();
                 if (rowIterator.hasNext()) rowIterator.next();
 
-                UUID uuid = UUID.fromString("8499c39c-0e30-4f9c-af41-8d5160169185");
+                int idMatch = 2388713;
                 while (rowIterator.hasNext()) {
                     Row row = rowIterator.next();
                     if (getStringCell(row, 0).isEmpty()) continue;
 
-                    ActionHandball action = buildFromRow(row, uuid);
+                    ActionHandball action = buildFromRow(row, idMatch);
                     actions.add(action);
                 }
             }
@@ -65,7 +64,7 @@ public class CSVReading {
 
     private List<ActionHandball> readCsv(String fileName) throws IOException {
         List<ActionHandball> actions = new ArrayList<>();
-        UUID uuid = UUID.randomUUID();
+        int idMatch = 2388713;
 
         try (BufferedReader br = Files.newBufferedReader(Paths.get(fileName), StandardCharsets.UTF_8)) {
             String line;
@@ -77,7 +76,7 @@ public class CSVReading {
                 String[] cols = splitCsvLine(line);
                 if (cols.length == 0 || cols[0].trim().isEmpty()) continue;
 
-                ActionHandball action = buildFromCsvCols(cols, uuid);
+                ActionHandball action = buildFromCsvCols(cols, idMatch);
                 actions.add(action);
             }
         }
@@ -111,7 +110,7 @@ public class CSVReading {
         return parts.toArray(new String[0]);
     }
 
-    private ActionHandball buildFromRow(Row row, UUID uuid) {
+    private ActionHandball buildFromRow(Row row, int idMatch) {
         String nom                    = getStringCell(row, 0);
         double position               = getNumericCell(row, 1);
         double duree                  = getNumericCell(row, 2);
@@ -133,7 +132,7 @@ public class CSVReading {
 
         return new ActionHandball(
                 (long) -1,
-                uuid,
+                idMatch,
                 nom,
                 position,
                 duree,
@@ -155,7 +154,7 @@ public class CSVReading {
         );
     }
 
-    private ActionHandball buildFromCsvCols(String[] cols, UUID uuid) {
+    private ActionHandball buildFromCsvCols(String[] cols, int matchId) {
         String nom                    = (0 < cols.length) ? cols[0].trim() : "";
         double position               = parseDoubleSafe((1 < cols.length) ? cols[1].trim() : "");
         double duree                  = parseDoubleSafe((2 < cols.length) ? cols[2].trim() : "");
@@ -177,7 +176,7 @@ public class CSVReading {
 
         return new ActionHandball(
                 (long) -1,
-                uuid,
+                matchId,
                 nom,
                 position,
                 duree,

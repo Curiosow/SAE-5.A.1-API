@@ -3,7 +3,6 @@ package fr.uphf.sae5a1api.data.impl.actions;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -12,7 +11,7 @@ public class ActionHandball {
 
     // ACTION CONFIG
     private Long id;
-    private UUID matchId;
+    private int matchId;
 
     // ACTION DETAILS
     private String nom;
