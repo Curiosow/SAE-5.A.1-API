@@ -1,0 +1,35 @@
+package fr.uphf.sae5a1api.controllers;
+
+import fr.uphf.sae5a1api.data.impl.actions.Match;
+import fr.uphf.sae5a1api.data.impl.actions.Team;
+import fr.uphf.sae5a1api.data.sql.managers.actions.MatchManager;
+import fr.uphf.sae5a1api.data.sql.managers.actions.TeamManager;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+public class MatchController {
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @GetMapping(value = "/match", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> match() {
+        // Récupération des données depuis la BDD
+        List<Match> allmatch = MatchManager.getAllMatchs();
+
+        // Construction de la réponse JSON
+        Map<String, Object> responseJson = new HashMap<>();
+        responseJson.put("docs", allmatch);
+
+        return ResponseEntity.ok(responseJson);
+    }
+
+}
