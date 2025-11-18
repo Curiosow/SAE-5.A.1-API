@@ -137,6 +137,24 @@ public class AuthController {
         return ResponseEntity.ok(members);
     }
 
+    @GetMapping("/userbymail")
+    public ResponseEntity<Map<String, Object>> getUserByEmail(@RequestParam String email) {
+        Map<String, Object> member = new HashMap<>();
+        
+        UserManager.getMemberByMail(email, rs -> {
+            try {
+                member.put(FIRST_NAME, rs.getString(FIRST_NAME));
+                member.put(LAST_NAME, rs.getString(LAST_NAME));
+                member.put(EMAIL, rs.getString(EMAIL));
+                member.put("account_type", rs.getString("account_type"));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return ResponseEntity.ok(member);
+    }
+
     @GetMapping("/players")
     public ResponseEntity<List<Map<String, Object>>> getPlayers() {
         List<Map<String, Object>> players = new ArrayList<>();
@@ -274,26 +292,5 @@ public class AuthController {
         UserManager.updateCoachActive(email, isActive);
         return ResponseEntity.ok("Statut d'activité du coach mis à jour !");
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

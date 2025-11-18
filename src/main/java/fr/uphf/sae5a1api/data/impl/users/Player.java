@@ -9,6 +9,7 @@ import java.util.UUID;
 @Getter
 @Setter
 public class Player extends User {
+
     private UUID team_id;
     private Integer jersey_number;
     private Date birth_date;
