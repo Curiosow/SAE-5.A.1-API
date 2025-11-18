@@ -172,6 +172,7 @@ public class AuthController {
                 player.put(IS_ACTIVE, rs.getBoolean(IS_ACTIVE));
                 player.put(UPDATED_AT, rs.getTimestamp(UPDATED_AT));
                 player.put("picture", rs.getString("picture"));
+                player.put("nom_csv", rs.getString("nom_csv"));
                 players.add(player);
             } catch (Exception e) {
                 throw new RuntimeException(e);
