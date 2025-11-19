@@ -20,5 +20,6 @@ public abstract class User {
     private boolean active;
     private Date created_at;
     private Date updated_at;
+    private UUID team_id;
 
 }

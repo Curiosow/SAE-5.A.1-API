@@ -1,7 +1,6 @@
 package fr.uphf.sae5a1api.controllers;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
-import fr.uphf.sae5a1api.SAE5A1ApiApplication;
 import fr.uphf.sae5a1api.data.sql.managers.users.UserManager;
 import fr.uphf.sae5a1api.data.impl.users.Coach;
 import fr.uphf.sae5a1api.data.impl.users.Player;
@@ -9,8 +8,9 @@ import fr.uphf.sae5a1api.data.impl.users.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.Normalizer;
+import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
 
 @RestController
 @RequestMapping("/auth")
@@ -21,9 +21,17 @@ public class AuthController {
     public final String EMAIL = "email";
     public final String IS_ACTIVE = "is_active";
     public final String UPDATED_AT = "updated_at";
+    public final String TEAM_ID = "team_id";
 
+    // Savers
     @PostMapping("/register_coach")
-    public ResponseEntity<String> registerCoach(@RequestParam String email, @RequestParam String password, @RequestParam String firstName, @RequestParam String lastName) {
+    public ResponseEntity<String> registerCoach(
+            @RequestParam String email,
+            @RequestParam String password,
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam String team_id) {
+
         User user = new Coach(
                 UUID.randomUUID(),
                 email,
@@ -32,7 +40,8 @@ public class AuthController {
                 lastName,
                 true,
                 new Date(System.currentTimeMillis()),
-                new Date(System.currentTimeMillis())
+                new Date(System.currentTimeMillis()),
+                UUID.fromString(team_id)
         );
 
         UserManager.createUser(user);
@@ -44,28 +53,27 @@ public class AuthController {
         @RequestParam String password,
         @RequestParam String firstName,
         @RequestParam String lastName,
+        @RequestParam String team_id,
         @RequestParam Integer jersey_number,
         @RequestParam String birth_date,
         @RequestParam Integer height_cm) {
 
         Date birthDateParsed;
         try {
-            birthDateParsed = new java.text.SimpleDateFormat("yyyy-MM-dd").parse(birth_date);
+            birthDateParsed = new SimpleDateFormat("yyyy-MM-dd").parse(birth_date);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Format de date invalide (attendu : yyyy-MM-dd)");
         }
 
-        String nom_csv = java.text.Normalizer.normalize(firstName, java.text.Normalizer.Form.NFD)
-                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "") // "Léa" -> "Lea"
-                .trim()                                            // " Lea " -> "Lea"
+        // Met le nom d'utilisateur en full maj, retire les espaces en trop et retire tous les accents
+        String nom_csv = Normalizer.normalize(firstName, Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .trim()
                 .toUpperCase();
-
-
-
 
         Player player = new Player(
                 UUID.randomUUID(),
-                UUID.fromString("e2a4c7b1-9f3d-4e6a-8b2c-7d1e5f4c3a2b"),
+                UUID.fromString(team_id),
                 email,
                 BCrypt.withDefaults().hashToString(12, password.toCharArray()),
                 firstName,
@@ -81,35 +89,12 @@ public class AuthController {
                 nom_csv
         );
 
-        UserManager.createPlayer(player);
+        UserManager.createUser(player);
         return ResponseEntity.ok("Création de l'utilisateur réussie !");
     }
 
-    /*@PostMapping("/register_team")
-    public ResponseEntity<String> registerTeam(@RequestParam String name, @RequestParam String description, @RequestParam String season, @RequestParam boolean active, @RequestParam boolean is_active) {
-        Team team = new Team(
-                UUID.randomUUID(),
-                null,
-                name,
-                description,
-                season,
-                active,
-                is_active,
-                new Date(System.currentTimeMillis()),
-                new Date(System.currentTimeMillis())
 
-        );
-
-        UserManager.createUser(team);
-        return ResponseEntity.ok("Création de l'utilisateur réussie !");
-    }*/
-
-
-
-
-
-
-
+    // Getters
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestParam String email, @RequestParam String password) {
         User user = UserManager.login(email, password);
@@ -128,8 +113,8 @@ public class AuthController {
                 member.put(LAST_NAME, rs.getString(LAST_NAME));
                 member.put(EMAIL, rs.getString(EMAIL));
                 member.put("account_type", rs.getString("account_type"));
+                member.put(TEAM_ID, ((UUID) rs.getObject("team_id")).toString());
                 members.add(member);
-                SAE5A1ApiApplication.getLogger().log(Level.INFO, "Membre trouvé : " + rs.getString("email"));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -147,6 +132,7 @@ public class AuthController {
                 member.put(LAST_NAME, rs.getString(LAST_NAME));
                 member.put(EMAIL, rs.getString(EMAIL));
                 member.put("account_type", rs.getString("account_type"));
+                member.put(TEAM_ID, ((UUID) rs.getObject("team_id")).toString());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -162,6 +148,7 @@ public class AuthController {
             try {
                 Map<String, Object> player = new HashMap<>();
                 player.put("id", rs.getString("id"));
+                player.put(TEAM_ID, ((UUID) rs.getObject("team_id")).toString());
                 player.put(FIRST_NAME, rs.getString(FIRST_NAME));
                 player.put(LAST_NAME, rs.getString(LAST_NAME));
                 player.put("team_name", rs.getString("team_name"));
@@ -181,7 +168,7 @@ public class AuthController {
         return ResponseEntity.ok(players);
     }
 
-@GetMapping("/coaches")
+    @GetMapping("/coaches")
     public ResponseEntity<List<Map<String, Object>>> getCoaches() {
         List<Map<String, Object>> coaches = new ArrayList<>();
         UserManager.getCoach(rs -> {
@@ -192,6 +179,7 @@ public class AuthController {
                 coach.put(LAST_NAME, rs.getString(LAST_NAME));
                 coach.put(IS_ACTIVE, rs.getBoolean(IS_ACTIVE));
                 coach.put(UPDATED_AT, rs.getTimestamp(UPDATED_AT));
+                coach.put(TEAM_ID, ((UUID) rs.getObject("team_id")).toString());
                 coaches.add(coach);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -200,98 +188,17 @@ public class AuthController {
         return ResponseEntity.ok(coaches);
     }
 
+    // Updaters
+    @PostMapping("/update_information")
+    public ResponseEntity<String> updateInformation(
+            @RequestParam String coach,
+            @RequestParam String type,
+            @RequestParam Object newValue,
+            @RequestParam String email) {
+        boolean boolCoach = Boolean.parseBoolean(coach);
 
-    @PostMapping("/update_player_firstname")
-    public ResponseEntity<String> updatePlayerFirstName(
-            @RequestParam String email,
-            @RequestParam String newFirstName) {
-        UserManager.updatePlayerFirstName(email, newFirstName);
-        return ResponseEntity.ok("Prénom du joueur mis à jour !");
-    }
-
-    @PostMapping("/update_player_lastname")
-    public ResponseEntity<String> updatePlayerLastName(
-            @RequestParam String email,
-            @RequestParam String newLastName) {
-        UserManager.updatePlayerLastName(email, newLastName);
-        return ResponseEntity.ok("Nom du joueur mis à jour !");
-    }
-
-    @PostMapping("/update_player_number")
-    public ResponseEntity<String> updatePlayerNumber(
-            @RequestParam String email,
-            @RequestParam Integer jerseyNumber) {
-        UserManager.updatePlayerNumber(email, jerseyNumber);
-        return ResponseEntity.ok("Numéro du joueur mis à jour !");
-    }
-
-    @PostMapping("/update_player_height")
-    public ResponseEntity<String> updatePlayerHeight(
-            @RequestParam String email,
-            @RequestParam Integer heightCm) {
-        UserManager.updatePlayerHeight(email, heightCm);
-        return ResponseEntity.ok("Taille du joueur mise à jour !");
-    }
-
-    @PostMapping("/update_player_active")
-    public ResponseEntity<String> updatePlayerActive(
-            @RequestParam String email,
-            @RequestParam Boolean isActive) {
-        UserManager.updatePlayerActive(email, isActive);
-        return ResponseEntity.ok("Statut d'activité du joueur mis à jour !");
-    }
-
-    @PostMapping("/update_player_email")
-    public ResponseEntity<String> updatePlayerEmail(
-            @RequestParam String oldEmail,
-            @RequestParam String newEmail) {
-        UserManager.updatePlayerEmail(oldEmail, newEmail);
-        return ResponseEntity.ok("Email du joueur mis à jour !");
-    }
-
-    @PostMapping("/update_player_birthdate")
-    public ResponseEntity<String> updatePlayerBirthDate(
-            @RequestParam String email,
-            @RequestParam String birthDate) {
-        try {
-            java.util.Date birthDateParsed = new java.text.SimpleDateFormat("yyyy-MM-dd").parse(birthDate);
-            UserManager.updatePlayerBirthDate(email, birthDateParsed);
-            return ResponseEntity.ok("Date de naissance du joueur mise à jour !");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Format de date invalide (attendu : yyyy-MM-dd)");
-        }
-    }
-
-    @PostMapping("/update_coach_firstname")
-    public ResponseEntity<String> updateCoachFirstName(
-            @RequestParam String email,
-            @RequestParam String newFirstName) {
-        UserManager.updateCoachFirstName(email, newFirstName);
-        return ResponseEntity.ok("Prénom du coach mis à jour !");
-    }
-
-    @PostMapping("/update_coach_lastname")
-    public ResponseEntity<String> updateCoachLastName(
-            @RequestParam String email,
-            @RequestParam String newLastName) {
-        UserManager.updateCoachLastName(email, newLastName);
-        return ResponseEntity.ok("Nom du coach mis à jour !");
-    }
-
-    @PostMapping("/update_coach_email")
-    public ResponseEntity<String> updateCoachEmail(
-            @RequestParam String oldEmail,
-            @RequestParam String newEmail) {
-        UserManager.updateCoachEmail(oldEmail, newEmail);
-        return ResponseEntity.ok("Email du coach mis à jour !");
-    }
-
-    @PostMapping("/update_coach_active")
-    public ResponseEntity<String> updateCoachActive(
-            @RequestParam String email,
-            @RequestParam Boolean isActive) {
-        UserManager.updateCoachActive(email, isActive);
-        return ResponseEntity.ok("Statut d'activité du coach mis à jour !");
+        UserManager.updateInformation(boolCoach, type, newValue, email);
+        return ResponseEntity.ok("Modification effectué !");
     }
 
 }
