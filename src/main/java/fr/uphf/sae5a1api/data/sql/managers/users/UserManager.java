@@ -11,7 +11,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -28,17 +30,40 @@ public class UserManager {
     public static final String SAVE_PLAYER = "INSERT INTO (id, email, password, first_name, last_name, is_active, created_at, updated_at, team_id, jersey_number, birth_date, height_cm, weight_kg, picture, nom_csv) " + PLAYER_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?,?,?)";
 
     // Getters
-    public static final String GET_MEMBER_BY_MAIL = "SELECT first_name, last_name, email, 'player' AS account_type FROM " + PLAYER_TABLE + " WHERE email = ? UNION ALL SELECT first_name, last_name, email, 'coach' AS account_type FROM " + COACH_TABLE + " WHERE email = ?";
+    public static final String GET_MEMBER_BY_MAIL = "SELECT first_name, last_name, email, team_id, 'player' AS account_type FROM " + PLAYER_TABLE + " WHERE email = ? UNION ALL SELECT first_name, last_name, email, team_id, 'coach' AS account_type FROM " + COACH_TABLE + " WHERE email = ?";
     public static final String GET_COACH_BY_MAIL = "SELECT * FROM " + COACH_TABLE + " where email = ?";
     public static final String GET_PLAYER_BY_MAIL = "SELECT * FROM " + PLAYER_TABLE + " where email = ?";
 
     // Global getters
-    public static final String GET_MEMBERS = "SELECT first_name, last_name, email, 'player' AS account_type FROM " + PLAYER_TABLE + " UNION ALL SELECT first_name, last_name, email, 'coach' AS account_type FROM " + COACH_TABLE;
+    public static final String GET_MEMBERS = "SELECT first_name, last_name, email, team_id, 'player' AS account_type FROM " + PLAYER_TABLE + " UNION ALL SELECT first_name, last_name, email, team_id, 'coach' AS account_type FROM " + COACH_TABLE;
     public static final String GET_PLAYERS = "SELECT p.*, t.name AS team_name FROM " + PLAYER_TABLE + " p JOIN teams t ON p.team_id = t.id ";
     public static final String GET_COACHES = "SELECT * FROM " + COACH_TABLE;
 
-    // Updaters
-    public static final String UPDATE_INFORMATION = "UPDATE ? SET ? = ? WHERE email = ?";
+    private static final Set<String> COACH_UPDATABLE_COLUMNS = Set.of(
+            "first_name",
+            "last_name",
+            "email",
+            "password",
+            "team_id",
+            "is_active",
+            "updated_at"
+    );
+
+    private static final Set<String> PLAYER_UPDATABLE_COLUMNS = Set.of(
+            "first_name",
+            "last_name",
+            "email",
+            "password",
+            "team_id",
+            "is_active",
+            "jersey_number",
+            "birth_date",
+            "height_cm",
+            "weight_kg",
+            "picture",
+            "nom_csv",
+            "updated_at"
+    );
 
     // ---- IMPLEMENTATION ---- \\
 
@@ -117,22 +142,41 @@ public class UserManager {
 
     // Updaters
     public static void updateInformation(boolean coach, String type, Object newValue, String email) {
+        final String tableName = coach ? COACH_TABLE : PLAYER_TABLE;
+        final Set<String> allowedColumns = coach ? COACH_UPDATABLE_COLUMNS : PLAYER_UPDATABLE_COLUMNS;
+
+        if(!allowedColumns.contains(type)) {
+            throw new IllegalArgumentException("Colonne non autorisée pour la mise à jour : " + type);
+        }
+
+        final String updateQuery = "UPDATE " + tableName + " SET " + type + " = ? WHERE email = ?";
+
         DatabaseExecutor.executeVoidQuery(HikariConnector.get(), connection -> {
-            PreparedStatement statement = connection.prepareStatement(UPDATE_INFORMATION);
-            statement.setString(1, coach ? COACH_TABLE : PLAYER_TABLE);
-            statement.setString(2, type);
+            PreparedStatement statement = connection.prepareStatement(updateQuery);
 
-            if(newValue instanceof String)
-                statement.setString(3, (String) newValue);
-            if(newValue instanceof Integer)
-                statement.setInt(3, (Integer) newValue);
-            if(newValue instanceof Boolean)
-                statement.setBoolean(3, (Boolean) newValue);
-            if(newValue instanceof Date)
-                statement.setDate(3, new java.sql.Date(((Date) newValue).getTime()));
+            if(newValue == null) {
+                statement.setNull(1, Types.NULL);
+            } else if(newValue instanceof String) {
+                statement.setString(1, (String) newValue);
+            } else if(newValue instanceof Integer) {
+                statement.setInt(1, (Integer) newValue);
+            } else if(newValue instanceof Boolean) {
+                statement.setBoolean(1, (Boolean) newValue);
+            } else if(newValue instanceof java.sql.Date date) {
+                statement.setDate(1, date);
+            } else if(newValue instanceof Timestamp timestamp) {
+                statement.setTimestamp(1, timestamp);
+            } else if(newValue instanceof UUID uuid) {
+                statement.setObject(1, uuid);
+            } else if(newValue instanceof Date legacyDate) {
+                statement.setTimestamp(1, new Timestamp(legacyDate.getTime()));
+            } else {
+                throw new IllegalArgumentException("Type de valeur non pris en charge : " + newValue.getClass());
+            }
 
+            statement.setString(2, email);
 
-            statement.setString(4, email);
+            statement.executeUpdate();
         });
     }
 

@@ -1,14 +1,16 @@
 package fr.uphf.sae5a1api.controllers;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
-import fr.uphf.sae5a1api.data.sql.managers.users.UserManager;
 import fr.uphf.sae5a1api.data.impl.users.Coach;
 import fr.uphf.sae5a1api.data.impl.users.Player;
 import fr.uphf.sae5a1api.data.impl.users.User;
+import fr.uphf.sae5a1api.data.sql.managers.users.UserManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.text.Normalizer;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -113,7 +115,7 @@ public class AuthController {
                 member.put(LAST_NAME, rs.getString(LAST_NAME));
                 member.put(EMAIL, rs.getString(EMAIL));
                 member.put("account_type", rs.getString("account_type"));
-                member.put(TEAM_ID, ((UUID) rs.getObject("team_id")).toString());
+                member.put(TEAM_ID, ((UUID) rs.getObject(TEAM_ID)).toString());
                 members.add(member);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -132,7 +134,7 @@ public class AuthController {
                 member.put(LAST_NAME, rs.getString(LAST_NAME));
                 member.put(EMAIL, rs.getString(EMAIL));
                 member.put("account_type", rs.getString("account_type"));
-                member.put(TEAM_ID, ((UUID) rs.getObject("team_id")).toString());
+                member.put(TEAM_ID, ((UUID) rs.getObject(TEAM_ID)).toString());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -148,7 +150,7 @@ public class AuthController {
             try {
                 Map<String, Object> player = new HashMap<>();
                 player.put("id", rs.getString("id"));
-                player.put(TEAM_ID, ((UUID) rs.getObject("team_id")).toString());
+                player.put(TEAM_ID, ((UUID) rs.getObject(TEAM_ID)).toString());
                 player.put(FIRST_NAME, rs.getString(FIRST_NAME));
                 player.put(LAST_NAME, rs.getString(LAST_NAME));
                 player.put("team_name", rs.getString("team_name"));
@@ -179,7 +181,7 @@ public class AuthController {
                 coach.put(LAST_NAME, rs.getString(LAST_NAME));
                 coach.put(IS_ACTIVE, rs.getBoolean(IS_ACTIVE));
                 coach.put(UPDATED_AT, rs.getTimestamp(UPDATED_AT));
-                coach.put(TEAM_ID, ((UUID) rs.getObject("team_id")).toString());
+                coach.put(TEAM_ID, ((UUID) rs.getObject(TEAM_ID)).toString());
                 coaches.add(coach);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -193,12 +195,71 @@ public class AuthController {
     public ResponseEntity<String> updateInformation(
             @RequestParam String coach,
             @RequestParam String type,
-            @RequestParam Object newValue,
+            @RequestParam(required = false) String newValue,
             @RequestParam String email) {
         boolean boolCoach = Boolean.parseBoolean(coach);
 
-        UserManager.updateInformation(boolCoach, type, newValue, email);
+        Object parsedValue = convertNewValue(type, newValue);
+
+        UserManager.updateInformation(boolCoach, type, parsedValue, email);
         return ResponseEntity.ok("Modification effectué !");
+    }
+
+    private Object convertNewValue(String type, String rawValue) {
+        if(rawValue == null || rawValue.isBlank() || rawValue.equalsIgnoreCase("null"))
+            return null;
+
+        return switch (type) {
+            case IS_ACTIVE -> parseBoolean(rawValue);
+            case "jersey_number", "height_cm", "weight_kg" -> parseInteger(type, rawValue);
+            case TEAM_ID -> UUID.fromString(rawValue);
+            case "birth_date" -> parseSqlDate(rawValue);
+            case UPDATED_AT -> parseTimestamp(rawValue);
+            case EMAIL -> rawValue.toLowerCase(Locale.ROOT).trim();
+            case "password" -> BCrypt.withDefaults().hashToString(12, rawValue.toCharArray());
+            default -> rawValue;
+        };
+    }
+
+    private Boolean parseBoolean(String rawValue) {
+        if(rawValue.equalsIgnoreCase("true") || rawValue.equals("1"))
+            return true;
+        if(rawValue.equalsIgnoreCase("false") || rawValue.equals("0"))
+            return false;
+        throw new IllegalArgumentException("Valeur booléenne invalide : " + rawValue);
+    }
+
+    private Integer parseInteger(String field, String rawValue) {
+        try {
+            return Integer.valueOf(rawValue);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Valeur entière invalide pour " + field + " : " + rawValue, e);
+        }
+    }
+
+    private java.sql.Date parseSqlDate(String rawValue) {
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            formatter.setLenient(false);
+            return new java.sql.Date(formatter.parse(rawValue).getTime());
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Format de date attendu 'yyyy-MM-dd' pour birth_date", e);
+        }
+    }
+
+    private Timestamp parseTimestamp(String rawValue) {
+        if(rawValue.equalsIgnoreCase("now"))
+            return new Timestamp(System.currentTimeMillis());
+        try {
+            return Timestamp.from(java.time.Instant.parse(rawValue));
+        } catch (Exception ignored) {}
+
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            return new Timestamp(formatter.parse(rawValue).getTime());
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Format de timestamp invalide pour updated_at (ISO-8601 recommandé)", e);
+        }
     }
 
 }
