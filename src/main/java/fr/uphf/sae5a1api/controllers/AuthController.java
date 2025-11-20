@@ -95,6 +95,11 @@ public class AuthController {
         return ResponseEntity.ok("Création de l'utilisateur réussie !");
     }
 
+    @PostMapping("delete_player")
+    public ResponseEntity<String> deletePlayer(@RequestParam String email) {
+        UserManager.deleteUser(email);
+        return ResponseEntity.ok("Compte de " + email + " supprimé avec succès !");
+    }
 
     // Getters
     @PostMapping("/login")

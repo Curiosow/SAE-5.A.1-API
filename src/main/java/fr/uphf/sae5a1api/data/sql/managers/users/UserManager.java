@@ -28,6 +28,7 @@ public class UserManager {
     // Savers
     public static final String SAVE_COACH = "INSERT INTO " + COACH_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     public static final String SAVE_PLAYER = "INSERT INTO (id, email, password, first_name, last_name, is_active, created_at, updated_at, team_id, jersey_number, birth_date, height_cm, weight_kg, picture, nom_csv) " + PLAYER_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?,?,?)";
+    public static final String DELETE_PLAYER = "DELETE FROM " + PLAYER_TABLE + " WHERE email = ?";
 
     // Getters
     public static final String GET_MEMBER_BY_MAIL = "SELECT first_name, last_name, email, team_id, 'player' AS account_type FROM " + PLAYER_TABLE + " WHERE email = ? UNION ALL SELECT first_name, last_name, email, team_id, 'coach' AS account_type FROM " + COACH_TABLE + " WHERE email = ?";
@@ -92,6 +93,14 @@ public class UserManager {
                 statement.setString(15, player.getNom_csv());
             }
 
+            statement.executeUpdate();
+        });
+    }
+
+    public static void deleteUser(String email) {
+        DatabaseExecutor.executeVoidQuery(HikariConnector.get(), connection -> {
+            PreparedStatement statement = connection.prepareStatement(DELETE_PLAYER);
+            statement.setString(1, email);
             statement.executeUpdate();
         });
     }
