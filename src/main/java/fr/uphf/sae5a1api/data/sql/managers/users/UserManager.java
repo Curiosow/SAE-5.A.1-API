@@ -27,7 +27,7 @@ public class UserManager {
 
     // Savers
     public static final String SAVE_COACH = "INSERT INTO " + COACH_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    public static final String SAVE_PLAYER = "INSERT INTO (id, email, password, first_name, last_name, is_active, created_at, updated_at, team_id, jersey_number, birth_date, height_cm, weight_kg, picture, nom_csv) " + PLAYER_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?,?,?)";
+    public static final String SAVE_PLAYER = "INSERT INTO " + PLAYER_TABLE + " (id, email, password, first_name, last_name, is_active, created_at, updated_at, team_id, jersey_number, birth_date, height_cm, weight_kg, picture, nom_csv) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     public static final String DELETE_PLAYER = "DELETE FROM " + PLAYER_TABLE + " WHERE email = ?";
 
     // Getters
@@ -93,6 +93,7 @@ public class UserManager {
                 statement.setString(15, player.getNom_csv());
             }
 
+            System.out.println(statement);
             statement.executeUpdate();
         });
     }
