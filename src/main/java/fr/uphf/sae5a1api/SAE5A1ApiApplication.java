@@ -4,6 +4,8 @@ import fr.uphf.sae5a1api.data.HikariConnector;
 import fr.uphf.sae5a1api.runnable.GetRankingTask;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -15,7 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @SpringBootApplication
-public class SAE5A1ApiApplication {
+public class SAE5A1ApiApplication implements CommandLineRunner {
 
     @Getter
     @Setter
@@ -27,21 +29,44 @@ public class SAE5A1ApiApplication {
     @Getter
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
+    @Value("${db.host}")
+    private String dbHost;
+
+    @Value("${db.user}")
+    private String dbUser;
+
+    @Value("${db.password}")
+    private String dbPassword;
+
+    @Value("${db.name}")
+    private String dbName;
+
+    @Value("${db.port}")
+    private int dbPort;
+
     public static void main(String[] args) {
+        logger.log(Level.INFO, "Starting Spring App...");
+        SpringApplication.run(SAE5A1ApiApplication.class, args);
+        logger.log(Level.FINE, "Started Spring App.");
+    }
+
+    @Override
+    public void run(String... args) {
         logger.log(Level.INFO, "Starting WEB-API...");
 
-        logger.log(Level.INFO, "Connecting to database...");
+        logger.log(Level.INFO, "Connecting to database with configuration file...");
         try {
-            hikariConnector = HikariConnector.create("87.106.121.50", "leswinners", "kelawin", "postgres", 5432);
+            hikariConnector = HikariConnector.create(dbHost, dbUser, dbPassword, dbName, dbPort);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Erreur lors de la création du HikariConnector", e);
         }
 
         try {
-            if(hikariConnector.getConnection() != null && !hikariConnector.getConnection().isClosed())
+            if (hikariConnector.getConnection() != null && !hikariConnector.getConnection().isClosed()) {
                 logger.log(Level.FINE, "Connected to database.");
+            }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Erreur lors de la vérification de la connexion à la base", e);
         }
 
         logger.log(Level.INFO, "Starting runnables");
@@ -49,9 +74,6 @@ public class SAE5A1ApiApplication {
         scheduler.scheduleAtFixedRate(rankingTask, 1, 60 * 12, TimeUnit.MINUTES);
         logger.log(Level.FINE, "Started runnables.");
 
-        logger.log(Level.INFO, "Starting Spring App...");
-        SpringApplication.run(SAE5A1ApiApplication.class, args);
-        logger.log(Level.FINE, "Started Spring App.");
         logger.log(Level.FINE, "Started WEB-API. Welcome on board!");
     }
 
