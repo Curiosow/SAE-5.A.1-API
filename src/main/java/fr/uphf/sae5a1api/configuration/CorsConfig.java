@@ -17,6 +17,12 @@ public class CorsConfig {
                         .allowedMethods("*")
                         .allowedHeaders("*")
                         .allowCredentials(true);
+
+                registry.addMapping("/**")
+                        .allowedOrigins("https://oscarapi.eternyuhc.fr")
+                        .allowedMethods("*")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }
