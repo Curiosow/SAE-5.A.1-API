@@ -30,21 +30,28 @@ public class SAE5A1ApiApplication implements CommandLineRunner {
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     @Value("${db.host}")
-    private static String dbHost;
+    private String dbHost;
 
     @Value("${db.user}")
-    private static String dbUser;
+    private String dbUser;
 
     @Value("${db.password}")
-    private static String dbPassword;
+    private String dbPassword;
 
     @Value("${db.name}")
-    private static String dbName;
+    private String dbName;
 
     @Value("${db.port}")
-    private static int dbPort;
+    private int dbPort;
 
     public static void main(String[] args) {
+        logger.log(Level.INFO, "Starting Spring App...");
+        SpringApplication.run(SAE5A1ApiApplication.class, args);
+        logger.log(Level.FINE, "Started Spring App.");
+    }
+
+    @Override
+    public void run(String... args) {
         logger.log(Level.INFO, "Starting WEB-API...");
 
         logger.log(Level.INFO, "Connecting to database with configuration file...");
@@ -67,15 +74,7 @@ public class SAE5A1ApiApplication implements CommandLineRunner {
         scheduler.scheduleAtFixedRate(rankingTask, 1, 60 * 12, TimeUnit.MINUTES);
         logger.log(Level.FINE, "Started runnables.");
 
-        logger.log(Level.INFO, "Starting Spring App...");
-        SpringApplication.run(SAE5A1ApiApplication.class, args);
-        logger.log(Level.FINE, "Started Spring App.");
-
         logger.log(Level.FINE, "Started WEB-API. Welcome on board!");
     }
 
-    @Override
-    public void run(String... args) throws Exception {
-
-    }
 }
