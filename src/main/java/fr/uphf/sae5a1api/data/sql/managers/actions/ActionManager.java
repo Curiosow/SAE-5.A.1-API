@@ -5,37 +5,57 @@ import fr.uphf.sae5a1api.data.impl.actions.ActionHandball;
 import fr.uphf.sae5a1api.data.sql.executor.DatabaseExecutor;
 
 import java.sql.PreparedStatement;
-import java.util.UUID;
+// Ne pas oublier les imports pour les types
+import java.sql.Types;
 
 public class ActionManager {
 
     private static final String EVENEMENTS_TABLE = "evenements";
-    private static final String SAVE = "INSERT INTO " + EVENEMENTS_TABLE + " (match_id, nom, position, duree, defense, resultat, defenseplus, joueuse, secteur, attaqueplacees, enclenchements06, lieupb, passed, repli, defensemoins, enclenchementstransier, grandespace, jets7m, enclenchements6c5) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    // Mise à jour de la requête pour inclure team_id et les données enrichies
+    private static final String SAVE = "INSERT INTO " + EVENEMENTS_TABLE + " (" +
+            "match_id, team_id, nom, position, duree, defense, resultat, defenseplus, joueuse, secteur, " +
+            "attaqueplacees, enclenchements06, lieupb, passed, repli, defensemoins, " +
+            "enclenchementstransier, grandespace, jets7m, enclenchements6c5, " +
+            "temps_format, mi_temps, money_time, phase_jeu, score_sambre, score_adversaire" +
+            ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public static void saveAction(ActionHandball action) {
         DatabaseExecutor.executeVoidQuery(HikariConnector.get(), data -> {
             PreparedStatement statement = data.prepareStatement(ActionManager.SAVE);
+            int i = 1;
 
-            statement.setObject(1, action.getMatchId());
-            statement.setString(2, action.getNom());
-            statement.setDouble(3, action.getPosition());
-            statement.setDouble(4, action.getDuree());
-            statement.setString(5, action.getDefense());
-            statement.setString(6, action.getResultat());
-            statement.setString(7, action.getDefensePlus());
-            statement.setString(8, action.getJoueuse());
-            statement.setString(9, action.getSecteur());
-            statement.setString(10, action.getAttaquePlacees());
-            statement.setString(11, action.getEnclenchements06());
-            statement.setString(12, action.getLieuPb());
-            statement.setString(13, action.getPasseD());
-            statement.setString(14, action.getRepli());
-            statement.setString(15, action.getDefenseMoins());
-            statement.setString(16, action.getEnclenchementsTransiER());
-            statement.setString(17, action.getGrandEspace());
-            statement.setString(18, action.getJets7m());
-            statement.setString(19, action.getEnclenchements6c5());
+            // 1. Identifiants
+            statement.setInt(i++, action.getMatchId());
+            statement.setObject(i++, action.getTeamId()); // UUID (Nouveau)
+
+            // 2. Données standards
+            statement.setString(i++, action.getNom());
+            statement.setDouble(i++, action.getPosition());
+            statement.setDouble(i++, action.getDuree());
+            statement.setString(i++, action.getDefense());
+            statement.setString(i++, action.getResultat());
+            statement.setString(i++, action.getDefensePlus());
+            statement.setString(i++, action.getJoueuse());
+            statement.setString(i++, action.getSecteur());
+            statement.setString(i++, action.getAttaquePlacees());
+            statement.setString(i++, action.getEnclenchements06());
+            statement.setString(i++, action.getLieuPb());
+            statement.setString(i++, action.getPasseD());
+            statement.setString(i++, action.getRepli());
+            statement.setString(i++, action.getDefenseMoins());
+            statement.setString(i++, action.getEnclenchementsTransiER());
+            statement.setString(i++, action.getGrandEspace());
+            statement.setString(i++, action.getJets7m());
+            statement.setString(i++, action.getEnclenchements6c5());
+
+            // 3. Données Enrichies (Nouveaux champs)
+            statement.setString(i++, action.getTempsFormat());
+            statement.setObject(i++, action.getMiTemps(), Types.INTEGER);
+            statement.setObject(i++, action.getMoneyTime(), Types.BOOLEAN);
+            statement.setString(i++, action.getPhaseJeu());
+            statement.setObject(i++, action.getScoreSambre(), Types.INTEGER);
+            statement.setObject(i++, action.getScoreAdversaire(), Types.INTEGER);
 
             statement.executeUpdate();
         });
