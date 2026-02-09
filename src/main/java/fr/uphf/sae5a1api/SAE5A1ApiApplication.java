@@ -85,8 +85,6 @@ public class SAE5A1ApiApplication implements CommandLineRunner {
         logger.log(Level.FINE, "Started runnables.");
 
         logger.log(Level.FINE, "Started WEB-API. Welcome on board!");
-
-        HttpClient client = HttpClient.newHttpClient();
     }
 
 }
