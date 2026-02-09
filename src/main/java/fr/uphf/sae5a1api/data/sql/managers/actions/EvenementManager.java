@@ -9,11 +9,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class EvenementManager {
 
     public static final String EVENEMENTS_TABLE = "evenements";
     public static final String GET_ALL_EVENEMENTS = "SELECT * FROM " + EVENEMENTS_TABLE;
+
+    // REQUÊTE INSERT (ORDRE CRUCIAL)
+    public static final String INSERT_SQL = "INSERT INTO " + EVENEMENTS_TABLE + " (" +
+            "match_id, team_id, nom, position, duree, defense, resultat, defenseplus, joueuse, secteur, " +
+            "attaqueplacees, enclenchements06, lieupb, passed, repli, defensemoins, " +
+            "enclenchementstransier, grandespace, jets7m, enclenchements6c5, " +
+            "temps_format, mi_temps, money_time, phase_jeu, score_sambre, score_adversaire" +
+            ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
 
     public static List<Evenement> getAllEvenements() {
         return DatabaseExecutor.executeQuery(HikariConnector.get(), data -> {
@@ -25,21 +34,19 @@ public class EvenementManager {
         });
     }
 
-    // --- NOUVELLE MÉTHODE D'INSERTION ---
     public static void save(Evenement ev) {
         DatabaseExecutor.executeQuery(HikariConnector.get(), conn -> {
-            String sql = "INSERT INTO " + EVENEMENTS_TABLE + " (" +
-                    "match_id, nom, position, duree, defense, resultat, defenseplus, joueuse, secteur, " +
-                    "attaqueplacees, enclenchements06, lieupb, passed, repli, defensemoins, " +
-                    "enclenchementstransier, grandespace, jets7m, enclenchements6c5" +
-                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
-
-            PreparedStatement ps = conn.prepareStatement(sql);
+            PreparedStatement ps = conn.prepareStatement(INSERT_SQL);
             int i = 1;
+
+            // 1. Identifiants
             ps.setInt(i++, ev.getMatchId());
+            ps.setObject(i++, ev.getTeamId()); // UUID
+
+            // 2. Données Brutes (String / Double)
             ps.setString(i++, ev.getNom());
-            ps.setDouble(i++, ev.getPosition());
-            ps.setDouble(i++, ev.getDuree());
+            ps.setObject(i++, ev.getPosition());
+            ps.setObject(i++, ev.getDuree());
             ps.setString(i++, ev.getDefense());
             ps.setString(i++, ev.getResultat());
             ps.setString(i++, ev.getDefenseplus());
@@ -56,33 +63,52 @@ public class EvenementManager {
             ps.setString(i++, ev.getJets7m());
             ps.setString(i++, ev.getEnclenchements6c5());
 
+            // 3. Données Enrichies (Nouveaux champs)
+            ps.setString(i++, ev.getTempsFormat());
+            ps.setObject(i++, ev.getMiTemps());
+            ps.setObject(i++, ev.getMoneyTime());
+            ps.setString(i++, ev.getPhaseJeu());
+            ps.setObject(i++, ev.getScoreSambre());
+            ps.setObject(i++, ev.getScoreAdversaire());
+
             ps.execute();
-            return true; // On doit retourner quelque chose pour DatabaseExecutor
+            return true;
         });
     }
 
     private static Evenement buildEvenement(ResultSet rs) throws SQLException {
-        Evenement evenement = new Evenement();
-        evenement.setId(rs.getInt("id"));
-        evenement.setMatchId(rs.getInt("match_id"));
-        evenement.setNom(rs.getString("nom"));
-        evenement.setPosition(rs.getDouble("position"));
-        evenement.setDuree(rs.getDouble("duree"));
-        evenement.setDefense(rs.getString("defense"));
-        evenement.setResultat(rs.getString("resultat"));
-        evenement.setDefenseplus(rs.getString("defenseplus"));
-        evenement.setJoueuse(rs.getString("joueuse"));
-        evenement.setSecteur(rs.getString("secteur"));
-        evenement.setAttaqueplacees(rs.getString("attaqueplacees"));
-        evenement.setEnclenchements06(rs.getString("enclenchements06"));
-        evenement.setLieupb(rs.getString("lieupb"));
-        evenement.setPassed(rs.getString("passed"));
-        evenement.setRepli(rs.getString("repli"));
-        evenement.setDefensemoins(rs.getString("defensemoins"));
-        evenement.setEnclenchementstransier(rs.getString("enclenchementstransier"));
-        evenement.setGrandespace(rs.getString("grandespace"));
-        evenement.setJets7m(rs.getString("jets7m"));
-        evenement.setEnclenchements6c5(rs.getString("enclenchements6c5"));
-        return evenement;
+        Evenement ev = new Evenement();
+        ev.setId(rs.getInt("id"));
+        ev.setMatchId(rs.getInt("match_id"));
+        ev.setTeamId((UUID) rs.getObject("team_id")); // UUID
+
+        ev.setNom(rs.getString("nom"));
+        ev.setPosition(rs.getDouble("position"));
+        ev.setDuree(rs.getDouble("duree"));
+        ev.setDefense(rs.getString("defense"));
+        ev.setResultat(rs.getString("resultat"));
+        ev.setDefenseplus(rs.getString("defenseplus"));
+        ev.setJoueuse(rs.getString("joueuse"));
+        ev.setSecteur(rs.getString("secteur"));
+        ev.setAttaqueplacees(rs.getString("attaqueplacees"));
+        ev.setEnclenchements06(rs.getString("enclenchements06"));
+        ev.setLieupb(rs.getString("lieupb"));
+        ev.setPassed(rs.getString("passed"));
+        ev.setRepli(rs.getString("repli"));
+        ev.setDefensemoins(rs.getString("defensemoins"));
+        ev.setEnclenchementstransier(rs.getString("enclenchementstransier"));
+        ev.setGrandespace(rs.getString("grandespace"));
+        ev.setJets7m(rs.getString("jets7m"));
+        ev.setEnclenchements6c5(rs.getString("enclenchements6c5"));
+
+        // Enrichissement
+        ev.setTempsFormat(rs.getString("temps_format"));
+        ev.setMiTemps(rs.getObject("mi_temps") != null ? rs.getInt("mi_temps") : null);
+        ev.setMoneyTime(rs.getObject("money_time") != null ? rs.getBoolean("money_time") : null);
+        ev.setPhaseJeu(rs.getString("phase_jeu"));
+        ev.setScoreSambre(rs.getObject("score_sambre") != null ? rs.getInt("score_sambre") : null);
+        ev.setScoreAdversaire(rs.getObject("score_adversaire") != null ? rs.getInt("score_adversaire") : null);
+
+        return ev;
     }
 }

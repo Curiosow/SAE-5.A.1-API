@@ -4,87 +4,68 @@ import fr.uphf.sae5a1api.data.impl.actions.Evenement;
 import fr.uphf.sae5a1api.data.impl.actions.Match;
 import fr.uphf.sae5a1api.data.sql.managers.actions.EvenementManager;
 import fr.uphf.sae5a1api.data.sql.managers.actions.MatchManager;
+import fr.uphf.sae5a1api.dto.ImportMatchRequest;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 public class ImportController {
 
     @CrossOrigin(origins = "http://localhost:3000")
-    @PostMapping("/api/import/match-events")
-    public ResponseEntity<String> importMatchEvents(@RequestBody Map<String, Object> payload) {
+    @PostMapping(value = "/api/import/match-events", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> importMatchEvents(@RequestBody ImportMatchRequest request) {
         try {
-            String rencontreId = (String) payload.get("rencontreId");
-            String adversaire = (String) payload.get("adversaire");
-            String lieu = (String) payload.get("lieu");
-            String dateStr = (String) payload.get("dateMatch"); // Format YYYY-MM-DD attendu
+            System.out.println("--- RÉCEPTION IMPORT ---");
+            System.out.println("Rencontre ID : " + request.getRencontreId());
+            System.out.println("Team ID      : " + request.getTeamId());
 
-            List<Map<String, Object>> eventsData = (List<Map<String, Object>>) payload.get("events");
-
-            // 1. Vérifier ou Créer le Match
-            Match match = MatchManager.findByRencontreId(rencontreId);
-            int matchId;
-
-            if (match == null) {
-                // Conversion de la date si présente
-                LocalDate dateMatch = LocalDate.now();
-                try {
-                    if (dateStr != null) dateMatch = LocalDate.parse(dateStr);
-                } catch (Exception e) { /* Ignorer erreur date */ }
-
-                // CRÉATION AVEC TOUTES LES INFOS
-                matchId = MatchManager.createMatch(rencontreId, adversaire, lieu, dateMatch);
-                System.out.println("Match créé : " + adversaire + " (" + lieu + ")");
-            } else {
-                matchId = match.getId();
-                System.out.println("Match existant trouvé : ID " + matchId);
+            if (request.getEvents() == null || request.getEvents().isEmpty()) {
+                return ResponseEntity.badRequest().body("Erreur : La liste d'événements est vide.");
             }
 
-            // 2. Sauvegarder les événements (Code inchangé)
-            int count = 0;
-            for (Map<String, Object> eventMap : eventsData) {
-                Evenement ev = new Evenement();
-                ev.setMatchId(matchId);
-                ev.setNom((String) eventMap.get("nom"));
-                ev.setPosition(toDouble(eventMap.get("position")));
-                ev.setDuree(toDouble(eventMap.get("duree")));
-                ev.setDefense((String) eventMap.get("defense"));
-                ev.setResultat((String) eventMap.get("resultat"));
-                ev.setDefenseplus((String) eventMap.get("defenseplus"));
-                ev.setJoueuse((String) eventMap.get("joueuse"));
-                ev.setSecteur((String) eventMap.get("secteur"));
-                ev.setAttaqueplacees((String) eventMap.get("attaqueplacees"));
-                ev.setEnclenchements06((String) eventMap.get("enclenchements06"));
-                ev.setLieupb((String) eventMap.get("lieupb"));
-                ev.setPassed((String) eventMap.get("passed"));
-                ev.setRepli((String) eventMap.get("repli"));
-                ev.setDefensemoins((String) eventMap.get("defensemoins"));
-                ev.setEnclenchementstransier((String) eventMap.get("enclenchementstransier"));
-                ev.setGrandespace((String) eventMap.get("grandespace"));
-                ev.setJets7m((String) eventMap.get("jets7m"));
-                ev.setEnclenchements6c5((String) eventMap.get("enclenchements6c5"));
+            // Test du premier élément pour voir si le mapping JSON a fonctionné
+            Evenement first = request.getEvents().get(0);
+            System.out.println("TEST DATA -> Temps: " + first.getTempsFormat() + " | Phase: " + first.getPhaseJeu());
 
+            // 1. GESTION DU MATCH
+            int matchId;
+            Match match = MatchManager.findByRencontreId(request.getRencontreId());
+
+            if (match == null) {
+                System.out.println("Match introuvable, création...");
+                LocalDate dateMatch = LocalDate.now();
+                try {
+                    if (request.getDateMatch() != null) dateMatch = LocalDate.parse(request.getDateMatch());
+                } catch (Exception e) { /* Ignorer format date */ }
+
+                matchId = MatchManager.createMatch(
+                        request.getRencontreId(),
+                        request.getAdversaire(),
+                        request.getLieu(),
+                        dateMatch
+                );
+            } else {
+                matchId = match.getId();
+            }
+
+            // 2. SAUVEGARDE EN BASE
+            int count = 0;
+            for (Evenement ev : request.getEvents()) {
+                ev.setMatchId(matchId);
+                ev.setTeamId(request.getTeamId()); // Injection de l'équipe
                 EvenementManager.save(ev);
                 count++;
             }
 
+            System.out.println("--- IMPORT TERMINÉ (" + count + " lignes) ---");
             return ResponseEntity.ok("Succès : " + count + " événements importés.");
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Erreur : " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Erreur serveur : " + e.getMessage());
         }
-    }
-
-    private Double toDouble(Object obj) {
-        if (obj == null) return 0.0;
-        if (obj instanceof Number) return ((Number) obj).doubleValue();
-        try { return Double.parseDouble(obj.toString().replace(',', '.')); }
-        catch (Exception e) { return 0.0; }
     }
 }
