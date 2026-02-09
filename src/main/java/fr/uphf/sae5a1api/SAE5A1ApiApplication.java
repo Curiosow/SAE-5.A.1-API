@@ -87,18 +87,6 @@ public class SAE5A1ApiApplication implements CommandLineRunner {
         logger.log(Level.FINE, "Started WEB-API. Welcome on board!");
 
         HttpClient client = HttpClient.newHttpClient();
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.day.app/4FsnGRYeRScnnceYvxxDs/Body"))
-                .build();
-
-        try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("Code de réponse : " + response.statusCode());
-            System.out.println("Réponse : " + response.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
 }
