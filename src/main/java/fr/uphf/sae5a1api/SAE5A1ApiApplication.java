@@ -89,9 +89,7 @@ public class SAE5A1ApiApplication implements CommandLineRunner {
         HttpClient client = HttpClient.newHttpClient();
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://ntfy.sh/coolifyoscartest"))
-                .POST(HttpRequest.BodyPublishers.ofString("Started"))
-                .header("Title", "backend coolify sae")
+                .uri(URI.create("https://api.day.app/4FsnGRYeRScnnceYvxxDs/Body"))
                 .build();
 
         try {
