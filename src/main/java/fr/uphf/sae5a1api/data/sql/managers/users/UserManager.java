@@ -1,25 +1,26 @@
 package fr.uphf.sae5a1api.data.sql.managers.users;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
-import fr.uphf.sae5a1api.data.sql.executor.DatabaseExecutor;
-import fr.uphf.sae5a1api.data.impl.users.Coach;
 import fr.uphf.sae5a1api.data.HikariConnector;
+import fr.uphf.sae5a1api.data.impl.users.Coach;
 import fr.uphf.sae5a1api.data.impl.users.Player;
 import fr.uphf.sae5a1api.data.impl.users.User;
+import fr.uphf.sae5a1api.data.sql.executor.DatabaseExecutor;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+/**
+ * Classe de gestion des utilisateurs (coachs et joueurs).
+ * Fournit des méthodes pour créer, supprimer, récupérer et mettre à jour les informations des utilisateurs.
+ */
 public class UserManager {
 
     // TABLES
+
     public static final String COACH_TABLE = "coaches";
     public static final String PLAYER_TABLE = "players";
 
@@ -39,7 +40,6 @@ public class UserManager {
     public static final String GET_MEMBERS = "SELECT first_name, last_name, email, team_id, 'player' AS account_type FROM " + PLAYER_TABLE + " UNION ALL SELECT first_name, last_name, email, team_id, 'coach' AS account_type FROM " + COACH_TABLE;
     public static final String GET_PLAYERS = "SELECT p.*, t.name AS team_name FROM " + PLAYER_TABLE + " p JOIN teams t ON p.team_id = t.id ";
     public static final String GET_COACHES = "SELECT * FROM " + COACH_TABLE;
-
     private static final Set<String> COACH_UPDATABLE_COLUMNS = Set.of(
             "first_name",
             "last_name",
@@ -49,7 +49,6 @@ public class UserManager {
             "is_active",
             "updated_at"
     );
-
     private static final Set<String> PLAYER_UPDATABLE_COLUMNS = Set.of(
             "first_name",
             "last_name",
@@ -68,7 +67,11 @@ public class UserManager {
 
     // ---- IMPLEMENTATION ---- \\
 
-    // Saver
+    /**
+     * Crée un utilisateur (coach ou joueur) dans la base de données.
+     *
+     * @param user L'utilisateur à créer.
+     */
     public static void createUser(User user) {
         DatabaseExecutor.executeVoidQuery(HikariConnector.get(), connection -> {
             PreparedStatement statement = connection.prepareStatement(user instanceof Coach ? SAVE_COACH : SAVE_PLAYER);
@@ -83,7 +86,7 @@ public class UserManager {
             statement.setTimestamp(8, new Timestamp(user.getUpdated_at().getTime()));
             statement.setObject(9, user.getTeam_id());
 
-            if(user instanceof Player player) {
+            if (user instanceof Player player) {
                 statement.setObject(9, player.getTeam_id());
                 statement.setInt(10, player.getJersey_number());
                 statement.setDate(11, new java.sql.Date(player.getBirth_date().getTime()));
@@ -98,6 +101,11 @@ public class UserManager {
         });
     }
 
+    /**
+     * Supprime un utilisateur (joueur) par email.
+     *
+     * @param email L'email de l'utilisateur à supprimer.
+     */
     public static void deleteUser(String email) {
         DatabaseExecutor.executeVoidQuery(HikariConnector.get(), connection -> {
             PreparedStatement statement = connection.prepareStatement(DELETE_PLAYER);
@@ -106,7 +114,11 @@ public class UserManager {
         });
     }
 
-    // [GLOBALS] GETTERS
+    /**
+     * Récupère tous les membres (coachs et joueurs) et applique une action sur chaque résultat.
+     *
+     * @param consumer Action à appliquer sur chaque ligne de résultat.
+     */
     public static void getMembers(Consumer<ResultSet> consumer) {
         DatabaseExecutor.executeVoidQuery(HikariConnector.get(), connection -> {
             PreparedStatement statement = connection.prepareStatement(GET_MEMBERS);
@@ -117,6 +129,12 @@ public class UserManager {
         });
     }
 
+    /**
+     * Récupère un membre par email et applique une action sur le résultat.
+     *
+     * @param email    L'email du membre à récupérer.
+     * @param consumer Action à appliquer sur le résultat.
+     */
     public static void getMemberByMail(String email, Consumer<ResultSet> consumer) {
         DatabaseExecutor.executeVoidQuery(HikariConnector.get(), connection -> {
             PreparedStatement statement = connection.prepareStatement(GET_MEMBER_BY_MAIL);
@@ -130,6 +148,11 @@ public class UserManager {
         });
     }
 
+    /**
+     * Récupère tous les joueurs et applique une action sur chaque résultat.
+     *
+     * @param consumer Action à appliquer sur chaque ligne de résultat.
+     */
     public static void getPlayer(Consumer<ResultSet> consumer) {
         DatabaseExecutor.executeVoidQuery(HikariConnector.get(), connection -> {
             PreparedStatement statement = connection.prepareStatement(GET_PLAYERS);
@@ -140,6 +163,11 @@ public class UserManager {
         });
     }
 
+    /**
+     * Récupère tous les coachs et applique une action sur chaque résultat.
+     *
+     * @param consumer Action à appliquer sur chaque ligne de résultat.
+     */
     public static void getCoach(Consumer<ResultSet> consumer) {
         DatabaseExecutor.executeVoidQuery(HikariConnector.get(), connection -> {
             PreparedStatement statement = connection.prepareStatement(GET_COACHES);
@@ -150,12 +178,19 @@ public class UserManager {
         });
     }
 
-    // Updaters
+    /**
+     * Met à jour une information spécifique pour un utilisateur (coach ou joueur).
+     *
+     * @param coach    Indique si l'utilisateur est un coach.
+     * @param type     Colonne à mettre à jour.
+     * @param newValue Nouvelle valeur.
+     * @param email    Email de l'utilisateur à mettre à jour.
+     */
     public static void updateInformation(boolean coach, String type, Object newValue, String email) {
         final String tableName = coach ? COACH_TABLE : PLAYER_TABLE;
         final Set<String> allowedColumns = coach ? COACH_UPDATABLE_COLUMNS : PLAYER_UPDATABLE_COLUMNS;
 
-        if(!allowedColumns.contains(type)) {
+        if (!allowedColumns.contains(type)) {
             throw new IllegalArgumentException("Colonne non autorisée pour la mise à jour : " + type);
         }
 
@@ -164,21 +199,21 @@ public class UserManager {
         DatabaseExecutor.executeVoidQuery(HikariConnector.get(), connection -> {
             PreparedStatement statement = connection.prepareStatement(updateQuery);
 
-            if(newValue == null) {
+            if (newValue == null) {
                 statement.setNull(1, Types.NULL);
-            } else if(newValue instanceof String) {
+            } else if (newValue instanceof String) {
                 statement.setString(1, (String) newValue);
-            } else if(newValue instanceof Integer) {
+            } else if (newValue instanceof Integer) {
                 statement.setInt(1, (Integer) newValue);
-            } else if(newValue instanceof Boolean) {
+            } else if (newValue instanceof Boolean) {
                 statement.setBoolean(1, (Boolean) newValue);
-            } else if(newValue instanceof java.sql.Date date) {
+            } else if (newValue instanceof java.sql.Date date) {
                 statement.setDate(1, date);
-            } else if(newValue instanceof Timestamp timestamp) {
+            } else if (newValue instanceof Timestamp timestamp) {
                 statement.setTimestamp(1, timestamp);
-            } else if(newValue instanceof UUID uuid) {
+            } else if (newValue instanceof UUID uuid) {
                 statement.setObject(1, uuid);
-            } else if(newValue instanceof Date legacyDate) {
+            } else if (newValue instanceof Date legacyDate) {
                 statement.setTimestamp(1, new Timestamp(legacyDate.getTime()));
             } else {
                 throw new IllegalArgumentException("Type de valeur non pris en charge : " + newValue.getClass());
@@ -190,7 +225,13 @@ public class UserManager {
         });
     }
 
-    // Other
+    /**
+     * Authentifie un utilisateur en vérifiant son email et son mot de passe.
+     *
+     * @param email       L'email de l'utilisateur.
+     * @param rawPassword Le mot de passe non chiffré.
+     * @return L'utilisateur authentifié ou null si les informations sont incorrectes.
+     */
     public static User login(String email, String rawPassword) {
         return DatabaseExecutor.executeQuery(HikariConnector.get(), connection -> {
             PreparedStatement statement = connection.prepareStatement(GET_COACH_BY_MAIL);
@@ -198,8 +239,8 @@ public class UserManager {
 
             ResultSet resultSet = statement.executeQuery();
 
-            if(resultSet.next()) {
-                if(BCrypt.verifyer().verify(rawPassword.toCharArray(), resultSet.getString("password")).verified)
+            if (resultSet.next()) {
+                if (BCrypt.verifyer().verify(rawPassword.toCharArray(), resultSet.getString("password")).verified)
                     return buildCoach(resultSet);
                 else
                     return null;
@@ -207,9 +248,9 @@ public class UserManager {
                 statement = connection.prepareStatement(GET_PLAYER_BY_MAIL);
                 statement.setString(1, email);
                 resultSet = statement.executeQuery();
-                if(resultSet.next()) {
+                if (resultSet.next()) {
                     System.out.println(resultSet.getString("first_name"));
-                    if(BCrypt.verifyer().verify(rawPassword.toCharArray(), resultSet.getString("password")).verified)
+                    if (BCrypt.verifyer().verify(rawPassword.toCharArray(), resultSet.getString("password")).verified)
                         return buildPlayer(resultSet);
                     else
                         return null;
@@ -220,7 +261,13 @@ public class UserManager {
         });
     }
 
-    // Builders
+    /**
+     * Construit un objet Coach à partir d'un ResultSet.
+     *
+     * @param rs Le ResultSet contenant les données.
+     * @return Un objet Coach.
+     * @throws SQLException En cas d'erreur SQL.
+     */
     private static Coach buildCoach(ResultSet rs) throws SQLException {
         UUID uuid = (UUID) rs.getObject("id");
         String email = rs.getString("email");
@@ -235,6 +282,13 @@ public class UserManager {
         return new Coach(uuid, email, password, firstName, lastName, isActive, createdAt, updatedAt, teamId);
     }
 
+    /**
+     * Construit un objet Player à partir d'un ResultSet.
+     *
+     * @param rs Le ResultSet contenant les données.
+     * @return Un objet Player.
+     * @throws SQLException En cas d'erreur SQL.
+     */
     private static Player buildPlayer(ResultSet rs) throws SQLException {
         UUID uuid = (UUID) rs.getObject("id");
         UUID team_id = (UUID) rs.getObject("team_id");
