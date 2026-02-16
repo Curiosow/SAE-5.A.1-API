@@ -2,6 +2,7 @@ package fr.uphf.sae5a1api;
 
 import fr.uphf.sae5a1api.data.HikariConnector;
 import fr.uphf.sae5a1api.runnable.GetRankingTask;
+import fr.uphf.sae5a1api.runnable.GetRencontreTask;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +10,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.sql.SQLException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -72,6 +77,11 @@ public class SAE5A1ApiApplication implements CommandLineRunner {
         logger.log(Level.INFO, "Starting runnables");
         GetRankingTask rankingTask = new GetRankingTask();
         scheduler.scheduleAtFixedRate(rankingTask, 1, 60 * 12, TimeUnit.MINUTES);
+        rankingTask.run();
+
+        GetRencontreTask rencontreTask = new GetRencontreTask();
+        scheduler.scheduleAtFixedRate(rencontreTask, 1, 60 * 30, TimeUnit.MINUTES);
+        rencontreTask.run();
         logger.log(Level.FINE, "Started runnables.");
 
         logger.log(Level.FINE, "Started WEB-API. Welcome on board!");
