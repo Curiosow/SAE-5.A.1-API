@@ -43,11 +43,11 @@ public class ImportController {
      *   <li>{@code dateMatch} (String, "yyyy-MM-dd") : optionnel, date du match</li>
      *   <li>{@code adversaire} (String) : nom de l'adversaire (optionnel pour la création)</li>
      *   <li>{@code lieu} (String) : lieu du match (optionnel pour la création)</li>
-     *   <li>{@code events} (List<Evenement>) : liste des événements à importer</li>
+     *   <li>{@code events} ({@code List<Evenement>}) : liste des événements à importer</li>
      * </ul>
      *
      * @param request le contenu de la requête d'import sérialisé en {@link ImportMatchRequest}
-     * @return ResponseEntity<String> contenant un message de succès ou d'erreur
+     * @return {@code ResponseEntity<String>} contenant un message de succès ou d'erreur
      */
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping(value = "/api/import/match-events", consumes = MediaType.APPLICATION_JSON_VALUE)
